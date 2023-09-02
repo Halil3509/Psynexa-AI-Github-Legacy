@@ -7,6 +7,8 @@ ADHD_Class = EyeDetection.ADHD_Calculation(video_path= './EyeDetection/VideoExam
 
 import HeadOscillation
 
-Head_class = HeadOscillation.Head(video_path="./HeadOscillation/HeadVideos/Anomaly.mp4")
+Head_class = HeadOscillation.Head(video_path="./HeadOscillation/HeadVideos/DEHB.mp4")
 
-Head_class.detect_video(name = "Anomaly")
+Head_class.detect_video(name = "DEHB")
+
+print(Head_class.head_score)

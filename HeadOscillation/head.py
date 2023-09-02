@@ -256,9 +256,13 @@ class Head():
             os.mkdir(FOLDER_PATH)
             
         file_path = os.path.join(FOLDER_PATH, )
-        with open(file_path, "w") as json_file:
-            json.dump(result_dict, json_file, indent = 4)
-            self.logger.info(f"Json results was saved successfully into {FOLDER_PATH}")
+        # with open(file_path, "w") as json_file:
+        #     json.dump(result_dict, json_file, indent = 4)
+        #     self.logger.info(f"Json results was saved successfully into {FOLDER_PATH}")
+        
+        # assign head score
+        self.head_score = result_dict
+        self.logger.info("Score is save into class's head score property.")
         
         # Save Draw settings
         self.draw_plot(plot_dict=plot_dict, name = name)
