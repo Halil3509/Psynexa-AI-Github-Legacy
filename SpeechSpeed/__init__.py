@@ -1,0 +1,1 @@
+from SpeechSpeed.speech_speed import SpeechSpeedClass
