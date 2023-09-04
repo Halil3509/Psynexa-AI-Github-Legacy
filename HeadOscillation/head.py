@@ -262,7 +262,7 @@ class Head():
         
         # assign head score
         self.head_score = result_dict
-        self.logger.info("Score is save into class's head score property.")
+        self.logger.info("Score is saved into class's head score property.")
         
         # Save Draw settings
         self.draw_plot(plot_dict=plot_dict, name = name)

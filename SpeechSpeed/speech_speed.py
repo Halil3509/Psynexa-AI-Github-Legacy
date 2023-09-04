@@ -71,6 +71,7 @@ class SpeechSpeedClass():
             print("Could not request results; {0}".format(e))
             return None
     
+    
     def return_result(self, result):
         if result < self.range["NORMAL_MIN"]:
             return "Depression", result

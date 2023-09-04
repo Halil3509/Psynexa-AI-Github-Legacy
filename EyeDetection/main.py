@@ -40,14 +40,27 @@ class ADHD_Calculation():
     
     
     
-    def calc_eye_score(self, plot = False, plot_name = "Normal Plot"):
+    def calc_eye_score(self, plot = False, plot_name = "Normal Plot", fps = 2):
+        
         
         camera = cv2.VideoCapture(self.video_path)
 
         plot_dict = dict()
         plot_dict['values'] = []
         plot_dict['time'] = []
-        frame_counter =0
+        frame_counter = 0
+        
+        total_frames = int(camera.get(cv2.CAP_PROP_FRAME_COUNT))
+        general_fps = int(camera.get(cv2.CAP_PROP_FPS))  # Frames per second of the video
+        
+        if general_fps == 0:
+            general_fps = 1
+            
+        video_minutes = int(total_frames/ general_fps)
+        
+        selected_frame_indexes = np.random.randint(1,30, size = fps)
+        total_tqdm_frames = video_minutes * fps
+        fps_counter = 0
         
         with self.map_face_mesh.FaceMesh(
             max_num_faces=1,
@@ -55,50 +68,66 @@ class ADHD_Calculation():
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5) as face_mesh:
 
-            with tqdm(total=int(camera.get(cv2.CAP_PROP_FRAME_COUNT))) as pbar:    
+            with tqdm(total=total_tqdm_frames) as pbar:    
                 
                 while True:
                     frame_counter +=1 # frame counter
                     ret, frame = camera.read() # getting frame from camera 
                     if not ret: 
                         break # no more frames break
-            
                     
-                    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                    results  = face_mesh.process(rgb_frame)
-                    if results.multi_face_landmarks:
-                        mesh_points = utils.landmarksDetection(frame, results)
-            
-                        # Get Eye mean 
-                        left_eye_coords = [mesh_points[p] for p in self._coords['LEFT_EYE']]
-                        left_mean_eye_coords = np.mean(left_eye_coords, axis=0)
-            
-                        right_eye_coords = [mesh_points[p] for p in self._coords['RIGHT_EYE']]
-                        right_mean_eye_coords = np.mean(right_eye_coords, axis=0)
+                    frame_number = int(camera.get(cv2.CAP_PROP_POS_FRAMES))
+                    
+                    if frame_number in selected_frame_indexes:
+                        
+                        bgr_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                        results  = face_mesh.process(bgr_frame)
+                        if results.multi_face_landmarks:
+                            mesh_points = utils.landmarksDetection(frame, results)
+                
+                            # Get Eye mean 
+                            left_eye_coords = [mesh_points[p] for p in self._coords['LEFT_EYE']]
+                            left_mean_eye_coords = np.mean(left_eye_coords, axis=0)
+                
+                            right_eye_coords = [mesh_points[p] for p in self._coords['RIGHT_EYE']]
+                            right_mean_eye_coords = np.mean(right_eye_coords, axis=0)
 
-            
-                        # Iris Mean
-                        left_iris_coords = [mesh_points[p] for p in self._coords['LEFT_IRIS']]
-                        left_mean_iris_coords = np.mean(left_iris_coords, axis=0)
-            
-                        right_iris_coords = [mesh_points[p] for p in self._coords['RIGHT_IRIS']]
-                        right_mean_iris_coords = np.mean(right_iris_coords, axis=0)
+                
+                            # Iris Mean
+                            left_iris_coords = [mesh_points[p] for p in self._coords['LEFT_IRIS']]
+                            left_mean_iris_coords = np.mean(left_iris_coords, axis=0)
+                
+                            right_iris_coords = [mesh_points[p] for p in self._coords['RIGHT_IRIS']]
+                            right_mean_iris_coords = np.mean(right_iris_coords, axis=0)
+                            
+                        
+                            # Calculating average of distance
+                            distance_right = np.linalg.norm(left_mean_eye_coords - left_mean_iris_coords)
+                            distance_left = np.linalg.norm(right_mean_eye_coords - right_mean_iris_coords)
+                            
+                            # We get focal lengths to put distance in a scale 
+                            focal_length_left = self.calc_focal_length(frame, iris_side='left')
+                            focal_length_right = self.calc_focal_length(frame, iris_side='right')
+                            
+                            if focal_length_left is not None and focal_length_right is not None:
+                             
+                                result_left = np.round((distance_left/focal_length_left)*100, 2)
+                                result_right = np.round((distance_right/focal_length_right)*100, 2)
+                                
+                                result = (result_left + result_right)/2
+                                
+                                plot_dict['values'].append(result)
+                                plot_dict['time'].append(frame_counter)
+                            
+                            
+                        # Increase progress bar
+                        pbar.update(1)
+                        fps_counter +=1
+                        if fps_counter == len(selected_frame_indexes):
+                            selected_frame_indexes += general_fps
+                            fps_counter = 0
                         
                     
-                        # Calculating average of distance
-                        distance_right = np.linalg.norm(left_mean_eye_coords - left_mean_iris_coords)
-                        distance_left = np.linalg.norm(right_mean_eye_coords - right_mean_iris_coords)
-                        distance = np.round((distance_left + distance_right)/2, 2)
-
-                        plot_dict['values'].append(distance)
-                        plot_dict['time'].append(frame_counter)
-                        
-                        
-                        
-                    
-                    # Increase progress bar
-                    pbar.update(1)
-                  
         self.logger.info("Eye calculation process finished :)")
         
         
@@ -125,7 +154,7 @@ class ADHD_Calculation():
         
         plt.title(f"{name} Distribution Plot")
         plt.plot(plot_dict['time'], plot_dict['values'])
-        plt.ylim(0,30)
+        # plt.ylim(0,2)
         
         self.add_plot_result(fig, name)
         
@@ -187,8 +216,8 @@ class ADHD_Calculation():
 
                 
 
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                results  = face_mesh.process(rgb_frame)
+                bgr_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                results  = face_mesh.process(bgr_frame)
                 if results.multi_face_landmarks:
                     mesh_points = utils.landmarksDetection(frame, results)
 
@@ -248,4 +277,60 @@ class ADHD_Calculation():
         cv2.destroyAllWindows()
         camera.release()
                 
+    
+    def calc_focal_length(self, image, iris_side = "left"):
+        """
         
+
+        Args:
+            image (_type_): _description_
+            iris_side (str, optional): Side of iris. Defaults to "left". 
+
+        Returns:
+            _type_: _description_
+        """
+        width = image.shape[0]
+        height = image.shape[1]
+
+        iris_left_min_x = -1
+        iris_left_max_x = -1
+        
+        if iris_side == 'left':
+            iris_coords = self._coords['LEFT_IRIS']
+        elif iris_side == 'right':
+            iris_coords = self._coords['RIGHT_IRIS']
+        else:
+            raise ValueError("iris_side parameter can only be right or left. Please choose one of them!")
+        
+
+        with self.map_face_mesh.FaceMesh(
+                max_num_faces=1,
+                refine_landmarks=True,
+                min_detection_confidence=0.5,
+                min_tracking_confidence=0.5) as face_mesh:
+
+        
+            results = face_mesh.process(image)
+        
+            if results.multi_face_landmarks:
+                mesh_points = utils.landmarksDetection(image, results)
+                for point in self._coords['LEFT_IRIS']:
+                    point0 = mesh_points[point]
+                    if iris_left_min_x == -1 or point0[0] < iris_left_min_x:
+                        iris_left_min_x = point0[0]
+                    if iris_left_max_x == -1 or point0[0] > iris_left_max_x:
+                        iris_left_max_x = point0[0]
+
+            real_dx = iris_left_max_x - iris_left_min_x
+            constant_dx = 11.7
+
+            normalizedFocaleX = 1.40625
+            fx = np.min([width, height]) * normalizedFocaleX
+            if real_dx == 0:
+                dZ = None
+            else:
+                dZ = (fx * (constant_dx / real_dx)) / 10.0
+                dZ = np.round(dZ, 2)
+
+            
+            return dZ

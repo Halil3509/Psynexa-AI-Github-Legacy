@@ -1,8 +1,8 @@
 import EyeDetection
 
-# ADHD_Class = EyeDetection.ADHD_Calculation(video_path= './EyeDetection/VideoExamples/Ahmet.mp4')
+ADHD_Class = EyeDetection.ADHD_Calculation(video_path= './EyeDetection/VideoExamples/Normal.mp4')
 
-# ADHD_Class.calc_eye_score(plot = True, plot_name="Ahmet")
+ADHD_Class.calc_eye_score(plot = True, plot_name="Halil1")
 
 
 import HeadOscillation
@@ -13,8 +13,8 @@ import HeadOscillation
 
 # print(Head_class.head_score)
 
-import SpeechSpeed 
+# import SpeechSpeed 
 
-SpeechSpeedClass = SpeechSpeed.SpeechSpeedClass('./SpeechSpeed/SpeechRecording/bipolar1.wav')
+# SpeechSpeedClass = SpeechSpeed.SpeechSpeedClass('./SpeechSpeed/SpeechRecording/bipolar1.wav')
 
-SpeechSpeedClass.calculate_speaking_speed()
+# SpeechSpeedClass.calculate_speaking_speed()
