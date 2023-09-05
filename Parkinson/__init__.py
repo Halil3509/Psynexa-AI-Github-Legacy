@@ -1,0 +1,1 @@
+from Parkinson.parkinson import ParkinsonDetection
