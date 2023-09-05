@@ -35,8 +35,16 @@
 # Parkinson_detecting_class.model_predict(img_path = "./Parkinson/temp_images/healthy_wave.png")
 
 
-import ChatBot
+# import ChatBot
 
-BlenderBot = ChatBot.ChatBot()
+# BlenderBot = ChatBot.ChatBot()
 
-BlenderBot.live_chat()
+# BlenderBot.live_chat()
+
+
+
+# import DemantiaClockTest
+
+# DemantiaClockTestClass = DemantiaClockTest.DemantiaClockTestClass()
+
+# DemantiaClockTestClass.model_predict(img_path='./DemantiaClockTest/temp_images/demantia.png')
