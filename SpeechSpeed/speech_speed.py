@@ -7,6 +7,7 @@ import yaml
 
 class SpeechSpeedClass():
     def __init__(self, audio_path):
+        self.speech_range = None
         self.speech_score = None
         self.audio_path = audio_path
         self.model = self.get_model()
@@ -21,7 +22,7 @@ class SpeechSpeedClass():
             logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
         return self._logger
 
-    def get_range(self, path = './range.yaml'):
+    def get_range(self, path = './speed_range.yaml'):
         with open(path, 'r') as yaml_file:
             data = yaml.load(yaml_file, Loader=yaml.FullLoader)
             
@@ -74,9 +75,19 @@ class SpeechSpeedClass():
     
     def return_result(self, result):
         if result < self.range["NORMAL_MIN"]:
-            return "Depression", result
+            self.speech_range = "depression"
+            self.speech_score = result
+            return "depression", result
+        
         elif result < self.range['HIGH_MIN']:
-            return "Normal", result
+            self.speech_range = "normal"
+            self.speech_score = result
+            return "normal", result
+        
         else:
-            return "Bipolar", result
+            self.speech_range = "bipolar",
+            self.speech_score = result
+            return "bipolar", result
+        
+        
         
