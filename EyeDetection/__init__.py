@@ -1,2 +1,2 @@
-from EyeDetection.main import ADHD_Calculation
+from EyeDetection.eye import ADHD_Calculation
 

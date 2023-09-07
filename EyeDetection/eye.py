@@ -15,9 +15,10 @@ from EyeDetection import utils
 class ADHD_Calculation():
     def __init__(self, video_path = None):
         self.score = None
+        self.label = None # Result Label
         self.video_path = video_path
         self._coords = self.get_yaml_file()
-        self.map_face_mesh = mp.solutions.face_mesh
+        self._range = self.get_yaml_file(r"D:\\Psynexa-AI-Github\\EyeDetection\\eye_range.yaml")
         
         
     @property
@@ -136,8 +137,25 @@ class ADHD_Calculation():
         
         self.score  = np.round(statistics.variance(plot_dict['values']), 2)
         self.logger.info(f"{plot_name} video score is {self.score} :)")
+        
+        # Assign Label
+        self.specify_label()
          
         return plot_dict    
+    
+    
+    def specify_label(self):
+        
+        if self.score < self._range["DEHB"]["MIN_THRESHOLD"]:
+            self.label = "normal"
+        elif self.score >= self._range["DEHB"]["MIN_THRESHOLD"]:
+            self.label = "low_ADHD"
+        elif self.score < self._range["DEHB"]["NORMAL_THRESHOLD"]:
+            self.label = "normal_ADHD"
+        else:
+            self.label = "high_ADHD"
+        
+        self.logger.info("Label assigning processes has been completed.")
     
     
     
