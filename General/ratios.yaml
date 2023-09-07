@@ -1,0 +1,35 @@
+Eye: {
+  normal: 5, # percent of decreased ADHD value
+  low_ADHD: 3,
+  normal_ADHD: 5,
+  high_ADHD: 8
+}
+
+Head: {
+  normal: 5, # percent of decreased ADHD value
+  low_ADHD: 3,
+  normal_ADHD: 5,
+  high_ADHD: 8
+}
+
+Speech: {
+  depression: 10, # percent of increased depression value
+  normal: 5, # percent of decreased depression and bipolar value
+  bipolar: 10
+}
+
+Dementia: {
+  dementia: 10, # percent of increased dementia value
+  healthy: 10 # percent of decreased dementia value
+}
+
+Parkinson: {
+  Spiral: {
+    parkinson: 10, # percent of increased parkinson value
+    healthy: 10 # percent of decreased parkinson value
+  },
+  Wave: {
+    parkinson: 10,
+    healthy: 10
+  }
+}
