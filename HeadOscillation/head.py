@@ -144,7 +144,7 @@ class Head():
     
     
     
-    def detect_video(self, threshold = 3, patience = None, fps = 2, name = "Normal"):
+    def detect_video(self, threshold = 3, patience = None, fps = 2, name = "Normal", plot = False):
         
         if patience == None: 
             patience = fps*2
@@ -239,13 +239,13 @@ class Head():
         
         self.logger.info("Detecting process finished successfully. Let's save results")
         
-        self.save_results(plot_dict=plot_dict, name = name)
+        self.save_results(plot_dict=plot_dict, name = name, plot = plot)
     
         return plot_dict
 
 
 
-    def save_results(self, plot_dict, name):
+    def save_results(self, plot_dict, name = None, plot = False):
         
         result_dict = dict()
         
@@ -266,10 +266,12 @@ class Head():
         self.score = result_dict
         self.logger.info("Score is saved into class's head score property.")
         
+        #specify label
+        self.specify_label()
         
-        
-        # Save Draw settings
-        self.draw_plot(plot_dict=plot_dict, name = name)
+        if plot:  
+            # Save Draw settings
+            self.draw_plot(plot_dict=plot_dict, name = name)
         
         
     def specify_label(self):
