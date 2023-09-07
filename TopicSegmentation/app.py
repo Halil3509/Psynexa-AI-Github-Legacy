@@ -24,7 +24,6 @@ input_text = st.text_area(
     value="",
     key="text",
     height=150
-
 )
 
 button=st.button('Get Segments')
@@ -33,13 +32,14 @@ if (button==True) and input_text != "":
     
     
     # Parse sample document and break it into sentences
-    texts = input_text.split('\n')
+    texts = input_text.split('.')
     sents = []
     for text in texts:
-        #english_text = translate(text, 'tr', 'en')
-        doc = nlp(text)
-        for sent in doc.sents:
-            sents.append(sent)
+        if text != "":
+            english_text = translate(text, 'tr', 'en')
+            doc = nlp(english_text)
+            for sent in doc.sents:
+                sents.append(sent)
 
     # Select tokens while ignoring punctuations and stopwords, and lowercase them
     MIN_LENGTH = 3
@@ -47,43 +47,24 @@ if (button==True) and input_text != "":
                         not token.is_stop and not token.is_punct and token.text.strip() and len(token) >= MIN_LENGTH] 
                         for sent in sents]
 
-    st.write("tokenized_Sentences: , ", tokenized_sents)
+
     st.write("building topic model ...")
 
     # Build gensim dictionary and topic model
     from gensim import corpora, models
     import numpy as np
-    import nltk
-    import string
-    import streamlit as st
-
-    # Download the Turkish stop words list if you haven't already
-    nltk.download('stopwords')
-    from nltk.corpus import stopwords
-    stop_words = set(stopwords.words('turkish'))
 
     np.random.seed(123)
 
     N_TOPICS = 5
     N_PASSES = 5
 
-    # Tokenized sentences in Turkish
-    # Make sure you have your tokenized_sents variable containing your Turkish text data
-    # tokenized_sents = [["turkish", "text", "data"], ["more", "text"]]
-
-    # Remove punctuation and stop words, and perform additional pre-processing if needed
-    punctuations = string.punctuation
-    tokenized_sents = [
-        [word for word in sent if word not in punctuations and word not in stop_words]
-        for sent in tokenized_sents
-    ]
-    st.write("Tokenized_sents ",tokenized_sents)
     dictionary = corpora.Dictionary(tokenized_sents)
     bow = [dictionary.doc2bow(sent) for sent in tokenized_sents]
+    #st.write("bow", bow)
     topic_model = models.LdaModel(corpus=bow, id2word=dictionary, num_topics=N_TOPICS, passes=N_PASSES)
 
-    st.write(topic_model.show_topics())
-
+    #st.write("bow finished")
 
 
     st.write("inferring topics ...")
@@ -91,7 +72,7 @@ if (button==True) and input_text != "":
     THRESHOLD = 0.05
     doc_topics = list(topic_model.get_document_topics(bow, minimum_probability=THRESHOLD))
 
-    st.write(doc_topics)
+    #st.write(doc_topics)
 
     # get top k topics for each sentence
     k = 3
@@ -109,6 +90,7 @@ if (button==True) and input_text != "":
     # assert(len(window_topics) == (len(tokenized_sents) - WINDOW_SIZE + 1))
     window_topics = [list(set(chain.from_iterable(window))) for window in window_topics]
 
+    st.write("window topic:", window_topics)
     # Encode topics for similarity computation
 
     from sklearn.preprocessing import MultiLabelBinarizer
@@ -116,7 +98,7 @@ if (button==True) and input_text != "":
     binarizer = MultiLabelBinarizer(classes=range(N_TOPICS))
 
     encoded_topic = binarizer.fit_transform(window_topics)
-
+    st.write("encoded topic: ", encoded_topic)
     # Get similarities
 
     st.write("generating segments ...")
@@ -125,7 +107,7 @@ if (button==True) and input_text != "":
 
     sims_topic = [cosine_similarity([pair[0]], [pair[1]])[0][0] for pair in zip(encoded_topic, encoded_topic[1:])]
     # plot
-
+    st.write("sims topic: ", sims_topic)
     # Compute depth scores
     depths_topic = get_depths(sims_topic)
     # plot
@@ -153,15 +135,8 @@ if (button==True) and input_text != "":
     slices = list(zip(segment_ids[:-1], segment_ids[1:]))
 
     segmented = [sents[s[0]: s[1]] for s in slices]
-
-    # for segment in segmented[:-1]:
-    #     print_list([translate(s.text, source_lang='en', target_lang='tr') for s in segment])
-    #     st.markdown("""---""")
-    # print_list([translate(s.text, source_lang='en', target_lang='tr') for s in segmented[-1]])
-    
+    st.write(segmented)
     for segment in segmented[:-1]:
-        print_list([s.text for s in segment])
+        print_list([translate(s.text, source_lang='en', target_lang='tr') for s in segment])
         st.markdown("""---""")
-    print_list([s.text for s in segmented[-1]])
-    
-    
+    print_list([translate(s.text, source_lang='en', target_lang='tr') for s in segmented[-1]])
