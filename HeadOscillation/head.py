@@ -15,8 +15,10 @@ from HeadOscillation import utils
 class Head():
     def __init__(self, video_path):
         self.video_path = self.get_video(video_path=video_path)
-        self.head_score = None
-        self._full_landmarks = self.get_landmarks()
+        self.score = None
+        self.label = None
+        self._full_landmarks = self.get_yaml(name = "Landmark")
+        self._range = self.get_yaml(path = "D:\Psynexa-AI-Github\HeadOscillation\head_range.yaml", name = "Range YAML")
     
     @property
     def logger(self):
@@ -33,13 +35,13 @@ class Head():
             raise FileNotFoundError(f"{video_path} was not found.")    
         
         
-    def get_landmarks(self, path = "D:\Psynexa-AI-Github\HeadOscillation\indexes.yaml"):
+    def get_yaml(self, path = "D:\Psynexa-AI-Github\HeadOscillation\indexes.yaml", name=  None):
         with open(path, 'r') as yaml_file:
             data = yaml.load(yaml_file, Loader=yaml.FullLoader)
             
             full_landmarks = data["HEAD_INDEXES"] + data["CHIN_INDEXES"] + data["RIGHT_EAR"] + data["LEFT_EAR"]
             
-            self.logger.info("Landmarks are ready :)")
+            self.logger.info(f"{name} is ready :)")
             return full_landmarks
       
       
@@ -261,14 +263,29 @@ class Head():
         #     self.logger.info(f"Json results was saved successfully into {FOLDER_PATH}")
         
         # assign head score
-        self.head_score = result_dict
+        self.score = result_dict
         self.logger.info("Score is saved into class's head score property.")
+        
+        
         
         # Save Draw settings
         self.draw_plot(plot_dict=plot_dict, name = name)
         
         
+    def specify_label(self):
         
+        if self.score < self._range["Head"]["NORMAL"]:
+            self.label = "normal"
+        elif self.score < self._range["Head"]["MIN_THRESHOLD"]:
+            self.label = "low_ADHD"
+        elif self.score < self._range["Head"]["NORMAL_THRESHOLD"]:
+            self.label = "normal_ADHD"
+        elif self.score < self._range["Head"]["HIGH_THRESHOLD"]:
+            self.label = "high_ADHD"
+        else:
+            self.label = "anomaly"
+        
+        self.logger.info("Label assigning process has been completed.")
 
 
         
