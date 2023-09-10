@@ -114,12 +114,12 @@ class DisorderDetection():
     
     
             
-    def run_disorder_detection(self, topic_texts):
+    def run_disorder_detection(self):
         total_result_dict = dict()
         for label in self.label_classes.values():
             total_result_dict[label] = 0
         
-        for text in topic_texts:
+        for text in self.topic_texts:
             if len(text) > 512:
                 chunks = self.split_text(text)
                 new_result_dict = self.chunks_disorder_detection(chunks)
@@ -127,9 +127,6 @@ class DisorderDetection():
             else:
                 new_result_dict = self.predict(text, self.model, max_len = len(text))
 
-            print(text)
-            print("sonuç:", new_result_dict)
-            print("*/"*60)
             total_result_dict = self.sum_dicts(total_result_dict, new_result_dict)
 
-        return self.divide_dict_values(total_result_dict, len(topic_texts))
+        return self.divide_dict_values(total_result_dict, len(self.topic_texts))
