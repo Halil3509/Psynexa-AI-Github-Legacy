@@ -42,7 +42,7 @@ def upload_audio(file):
 
 
 @app.route('/ai/audio_temp', methods = ['POST'])
-def get_audio():
+def get_audio_temp():
     
     uploaded_file = request.files['dosya.mp4a']
 
