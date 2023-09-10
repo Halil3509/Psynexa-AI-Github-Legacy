@@ -37,7 +37,8 @@ def get_audio():
         return 'No selected file'
     
     if file and file.filename.endswith('.m4a'):
-        file.save('/path/to/save/your/audio.m4a')
+        print("M4a file has been received successfully. ")
+        print(file.filename)
         return 'File uploaded successfully'
     
     return 'Invalid file format. Please upload an M4A file.'
