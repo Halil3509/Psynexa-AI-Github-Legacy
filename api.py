@@ -53,6 +53,8 @@ def get_audio():
         return jsonify({"message": "işlem başarılı", "uploaded_path": uploaded_file})
     else:
         return jsonify({'error': 'No file uploaded'})
+    
+    
 
 @app.route('/ai/full_disorder_detection', methods = ['POST'])
 def get_audio():
