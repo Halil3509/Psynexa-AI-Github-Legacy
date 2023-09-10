@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import os 
 
 app = Flask(__name__)
 
@@ -23,26 +24,35 @@ def add_data():
     else:
         return jsonify({'message': 'Invalid request. Please provide both "key" and "value".'}), 400
 
+def upload_audio(file):
+    # Create a directory to store the uploaded files if it doesn't exist
+    if not os.path.exists('uploads'):
+        os.makedirs('uploads')
+
+    # Get the file name
+    filename = file.filename
+
+    # Save the file to the 'uploads' directory
+    file.save(os.path.join('uploads', filename))
+
+    # Return the path to the uploaded file
+    return os.path.join('uploads', filename)
+
+
 
 @app.route('/audio_temp', methods = ['POST'])
 def get_audio():
-    print(request.files)
-    if 'files' not in request.files:
-        return 'No file part'
     
-    file = request.files['file']
-    
-    # If the user submits an empty part without a file, the browser
-    # will send an empty part without a filename.
-    if file.filename == '':
-        return 'No selected file'
-    
-    if file and file.filename.endswith('.m4a'):
-        print("M4a file has been received successfully. ")
-        print(file.filename)
-        return 'File uploaded successfully'
-    
-    return 'Invalid file format. Please upload an M4A file.'
+    uploaded_file = request.files['dosya.mp4a']
+
+    # Check if a file was uploaded
+    if uploaded_file.filename != '':
+        uploaded_path = upload_audio(uploaded_file)
+
+
+        return jsonify({"message": "işlem başarılı", "uploaded_path": uploaded_file})
+    else:
+        return jsonify({'error': 'No file uploaded'})
 
 @app.route('/ai/full_disorder_detection', methods = ['POST'])
 def get_audio():
