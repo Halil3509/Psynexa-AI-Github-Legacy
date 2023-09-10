@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 import os 
 import base64
 
+import General
+
 app = Flask(__name__)
 
 # Define a dictionary to store data (in-memory database for this example)
@@ -49,7 +51,11 @@ def get_audio_temp():
     # Check if a file was uploaded
     if uploaded_file.filename != '':
         uploaded_path = upload_audio(uploaded_file)
-
+    
+        run_class = General.Run(audio_path=uploaded_path)
+        
+        print("İkinci adımdasın ")
+        run_class.full_disorder_detection()
 
         return jsonify({"message": "işlem başarılı", "uploaded_path": uploaded_file})
     else:
