@@ -40,7 +40,7 @@ def upload_audio(file):
 
 
 
-@app.route('/audio_temp', methods = ['POST'])
+@app.route('/ai/audio_temp', methods = ['POST'])
 def get_audio():
     
     uploaded_file = request.files['dosya.mp4a']
@@ -74,6 +74,26 @@ def get_audio():
         return 'File uploaded successfully'
     
     return 'Invalid file format. Please upload an M4A file.'
+
+@app.route('/ai/image_temp', methods=['POST'])
+def receive_image():
+    # Get the base64 encoded image from the request
+    base64_image = request.form.get('image')
+
+    if base64_image is not None:
+        # Decode the base64 image
+        image_data = base64.b64decode(base64_image)
+
+        # Specify the file path where you want to save the image
+        file_path = 'received_image.jpg'
+
+        # Save the image
+        with open(file_path, 'wb') as f:
+            f.write(image_data)
+
+        return jsonify({'message': 'Image received and saved successfully'})
+    else:
+        return jsonify({'error': 'No image received'})
     
 
 if __name__ == '__main__':
