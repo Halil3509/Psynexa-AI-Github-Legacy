@@ -1,35 +1,46 @@
-from flask import Flask, jsonify, request
-
-from HeadOscillation import Head
-from EyeDetection import ADHD_Calculation
-from SpeechSpeed import SpeechSpeedClass
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
+# Define a dictionary to store data (in-memory database for this example)
+data = {}
 
-# Route to get a list of items
-# @app.route('/api/items', methods=['GET'])
-# def get_items():
-#     return jsonify({"items": items})
+@app.route('/api/data', methods=['POST'])
+def add_data():
+    # Get the JSON data from the request
+    request_data = request.get_json()
+
+    # Check if the required fields are present
+    if 'key' in request_data and 'value' in request_data:
+        key = request_data['key']
+        value = request_data['value']
+
+        # Store the data in the dictionary
+        data[key] = value
+
+        # Return a response
+        return jsonify({'message': f'Data with key "{key}" added successfully.'}), 201
+    else:
+        return jsonify({'message': 'Invalid request. Please provide both "key" and "value".'}), 400
 
 
-# Route to create a new item (POST request)
-@app.route('/speech_speech', methods=['POST'])
-def create_item():
-    req_body = request.json  # Assuming the client sends JSON data with the request
-    if not req_body:
-        return jsonify({"error": "Data not provided in JSON format"}), 400
+@app.route('/audio_temp', methods = ['POST'])
+def get_audio():
+    if 'file' not in request.files:
+        return 'No file part'
     
-    # Speech to text process
-    speech_class = SpeechSpeedClass(req_body["audio_path"])
-    speech_class.calculate_speaking_speed()    
-
-    return jsonify({"message": "Item created successfully", "item": req_body}), 201
-
-
-@app.route('/head_score', method = ['POST'])
-def get_head_score():
-    req_body = request.json
+    file = request.files['file']
+    
+    # If the user submits an empty part without a file, the browser
+    # will send an empty part without a filename.
+    if file.filename == '':
+        return 'No selected file'
+    
+    if file and file.filename.endswith('.m4a'):
+        file.save('/path/to/save/your/audio.m4a')
+        return 'File uploaded successfully'
+    
+    return 'Invalid file format. Please upload an M4A file.'
     
 
 if __name__ == '__main__':
