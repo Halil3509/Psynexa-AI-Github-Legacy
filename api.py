@@ -26,6 +26,26 @@ def add_data():
 
 @app.route('/audio_temp', methods = ['POST'])
 def get_audio():
+    print(request.files)
+    if 'files' not in request.files:
+        return 'No file part'
+    
+    file = request.files['file']
+    
+    # If the user submits an empty part without a file, the browser
+    # will send an empty part without a filename.
+    if file.filename == '':
+        return 'No selected file'
+    
+    if file and file.filename.endswith('.m4a'):
+        print("M4a file has been received successfully. ")
+        print(file.filename)
+        return 'File uploaded successfully'
+    
+    return 'Invalid file format. Please upload an M4A file.'
+
+@app.route('/ai/full_disorder_detection', methods = ['POST'])
+def get_audio():
     if 'file' not in request.files:
         return 'No file part'
     
