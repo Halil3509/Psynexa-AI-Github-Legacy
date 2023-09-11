@@ -31,10 +31,10 @@ class ParkinsonDetection():
         """
         
         if type == 'spiral' and model_path is None:
-            model_path ='~/Psynexa-AI-Github/Parkinson/models/spiral_model.hdf5'
+            model_path ='D:\Psynexa-AI-Github\Parkinson\models\spiral_model.hdf5'
 
         elif type == 'wave' and model_path is None:
-            model_path = '~/Psynexa-AI-Github/Parkinson/models/wave_model.hdf5'
+            model_path = 'D:\Psynexa-AI-Github\Parkinson\models\wave_model.hdf5'
             
         else:
             self.logger.error("Type only can be spiral or wave")
@@ -45,16 +45,15 @@ class ParkinsonDetection():
         return model
 
 
-    def model_predict(self, img_path, input_shape = (224,224)):
+    def model_predict(self, img, input_shape = (224,224)):
         """_summary_
 
         Args:
             img_path (_type_): _description_
             input_shape (tuple, optional): _description_. Defaults to (224,224).
         """
+        self.logger.info("Image is predicting for Parkinson situation.")
         
-        
-        img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         resized_image = cv2.resize(img, input_shape)
@@ -68,10 +67,10 @@ class ParkinsonDetection():
             label = self.classes[1]
             ratio = np.round(sigmoid_out[0][0], 2)
             
-        self.ratio = ratio
+        self.ratio = np.round(ratio, 2)
         self.estimated_label = label
         
         self.logger.info("Predicting process was completed :). Let's see results")
-        self.logger.info(f"Label = {label} - Ratio(%) = {ratio}")
+        self.logger.info(f"Label = {self.estimated_label} - Ratio(%) = {self.ratio}")
     
-        return label, ratio
+        

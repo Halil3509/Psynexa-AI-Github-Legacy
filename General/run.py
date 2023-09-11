@@ -18,10 +18,11 @@ class Run():
         # self._head_class = HeadOscillation.Head(video_path=video_path, fps = fps)
         self._spiral_parkinson_class = Parkinson.ParkinsonDetection(type = "spiral")
         self._wave_parkinson_class = Parkinson.ParkinsonDetection(type = "wave")
-        self._dementia_clock_test_class = DemantiaClockTest.DemantiaClockTestClass() # model_path parameter have already arranged
-        self.whisper_model = self.get_whisper_model()
+        #self._dementia_clock_test_class = DemantiaClockTest.DemantiaClockTestClass() # model_path parameter have already arranged
+        #self.whisper_model = self.get_whisper_model()
         #self._speech_speed_class = SpeechSpeed.SpeechSpeedClass(whisper_model= self.whisper_model)
-        self._ratios = self.get_ratios()
+        #self._ratios = self.get_ratios()
+        print("hazırızs")
         
     @property
     def logger(self):

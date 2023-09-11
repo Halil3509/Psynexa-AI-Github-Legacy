@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify
 import os 
 import base64
+from flask_cors import CORS
+import numpy as np
+import cv2
+import json
 
 import General
 
@@ -62,19 +66,66 @@ def get_audio_temp():
         return jsonify({'error': 'No file uploaded'})
     
     
+@app.route('/ai/predict_spiral_parkinson', methods = ['POST'])
+def detect_spiral_parkinson():
+    data = request.json  
+    base64_image = data.get('image')
+    
+    # Decode the base64 image
+    img_data = base64.b64decode(base64_image)
+    nparr = np.frombuffer(img_data, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    
+    run_class._spiral_parkinson_class.model_predict(img)
+    
+    
+    return jsonify({'message': 'Parkinson Spiral process finished successfully',
+                    "label": run_class._spiral_parkinson_class.estimated_label,
+                    "ratio": run_class._spiral_parkinson_class.ratio})
+
+
+@app.route('/ai/predict_wave_parkinson', methods = ['POST'])
+def detect_wave_parkinson():
+    data = request.json  
+    base64_image = data.get('image')
+    
+    # Decode the base64 image
+    img_data = base64.b64decode(base64_image)
+    nparr = np.frombuffer(img_data, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    
+    run_class._wave_parkinson_class.model_predict(img)
+    
+    
+    return jsonify({'message': 'Parkinson Wave process finished successfully',
+                    "label": run_class._wave_parkinson_class.estimated_label,
+                    "ratio": run_class._wave_parkinson_class.ratio})
+    
+    
     
 @app.route('/ai/image_temp', methods=['POST'])
 def receive_frame():
-    frame_data = request.form.get('frame')
-    # Decode the Base64 data
-    # For example, if you're using Python's base64 module
-    decoded_frame = base64.b64decode(frame_data)
+    try:
+        print(request.json)
+        images = request.json['images']
+        
+        
+            
+        data = json_file.read()
+        json_data = json.loads(data)
 
-    # Process the frame data as needed
-    # ...
+        # Access the images array
+        images = json_data['images']
 
-    return jsonify({'message': "Frame received successfully!"})
+        # Process the images as needed
+        for i, base64_data in enumerate(images):
+            with open(f'uploaded_image_{i}.png', 'wb') as f:
+                f.write(base64_data.decode('base64'))
 
+        return jsonify({'message': 'JSON file uploaded successfully!'}), 200
+
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
 if __name__ == '__main__':
     run_class = General.Run()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
