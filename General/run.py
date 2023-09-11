@@ -13,15 +13,14 @@ import TopicSegmentation
 import DisorderDetection
 
 class Run():
-    def __init__(self, video_path, audio_path, fps = 2):
-        self._audio_path = audio_path
-        self._eye_class = EyeDetection.ADHD_Calculation(video_path=video_path,fps = fps)
-        self._head_class = HeadOscillation.Head(video_path=video_path, fps = fps)
-        self._speech_speed_class = SpeechSpeed.SpeechSpeedClass(audio_path=audio_path)
+    def __init__(self, fps = 2):
+        # self._eye_class = EyeDetection.ADHD_Calculation(video_path=video_path,fps = fps)
+        # self._head_class = HeadOscillation.Head(video_path=video_path, fps = fps)
         self._spiral_parkinson_class = Parkinson.ParkinsonDetection(type = "spiral")
         self._wave_parkinson_class = Parkinson.ParkinsonDetection(type = "wave")
         self._dementia_clock_test_class = DemantiaClockTest.DemantiaClockTestClass() # model_path parameter have already arranged
-        self._whisper_model = self.get_whisper_model()
+        self.whisper_model = self.get_whisper_model()
+        self._speech_speed_class = SpeechSpeed.SpeechSpeedClass(whisper_model= self.whisper_model)
         self._ratios = self.get_ratios()
         
     @property
@@ -83,7 +82,10 @@ class Run():
         # Disorder Calculation
     
     
-    def full_disorder_detection(self):
+    def full_disorder_detection(self, audio_path):
+        
+        self._audio_path = audio_path
+        
         
         # Speech to Text Part
         self.speech_to_text()

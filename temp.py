@@ -7,13 +7,13 @@
 
 
 
-# import HeadOscillation
+import HeadOscillation
 
-# Head_class = HeadOscillation.Head(video_path="./HeadOscillation/HeadVideos/DEHB.mp4")
+Head_class = HeadOscillation.Head(video_path="./HeadOscillation/HeadVideos/Busra.mp4")
 
-# Head_class.detect_video(name = "DEHB")
+Head_class.detect_video(name = "Busra")
 
-# print(Head_class.head_score)
+print(Head_class.head_score)
 
 
 

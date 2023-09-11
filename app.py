@@ -45,19 +45,19 @@ def upload_audio(file):
 
 @app.route('/ai/audio_temp', methods = ['POST'])
 def get_audio_temp():
-    
-    uploaded_file = request.files['dosya.mp4a']
+    print(request.files)
+    uploaded_file = request.files['dosya.m4a']
 
     # Check if a file was uploaded
     if uploaded_file.filename != '':
         uploaded_path = upload_audio(uploaded_file)
     
-        run_class = General.Run(audio_path=uploaded_path)
         
-        print("İkinci adımdasın ")
-        run_class.full_disorder_detection()
+        
+        print("uploaded path:", uploaded_path)
+        run_class.full_disorder_detection(audio_path=uploaded_path)
 
-        return jsonify({"message": "işlem başarılı", "uploaded_path": uploaded_file})
+        return jsonify({"message": "işlem başarılı"})
     else:
         return jsonify({'error': 'No file uploaded'})
     
@@ -104,4 +104,5 @@ def receive_image():
     
 
 if __name__ == '__main__':
+    run_class = General.Run()
     app.run(debug=True)

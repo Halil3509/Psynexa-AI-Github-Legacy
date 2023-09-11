@@ -6,11 +6,10 @@ import speech_recognition as sr
 import yaml
 
 class SpeechSpeedClass():
-    def __init__(self, audio_path):
+    def __init__(self, whisper_model):
         self.speech_range = None
         self.speech_score = None
-        self.audio_path = audio_path
-        self.model = self.get_model()
+        self.whisper_model = whisper_model
         self.range = self.get_range()
         
         
@@ -30,29 +29,17 @@ class SpeechSpeedClass():
             return data
 
 
-    def get_model(self):
+    def calculate_speaking_speed(self, audio_path):
         
-        torch.cuda.is_available()
-        DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+        self.audio_path = audio_path
         
-        self.logger.info(f"The device is {DEVICE}. ")
-        
-        self.logger.info("Model is loading...")
-        model = whisper.load_model("medium", device = DEVICE)
-        self.logger.info("Model is ready :)")
-        
-        return model
-        
-
-    def calculate_speaking_speed(self):
-
         recognizer = sr.Recognizer()
 
         with sr.AudioFile(self.audio_path) as source:
             audio = recognizer.record(source)
 
         self.logger.info("Transcriptation process is starting ...")
-        text = self.model.transcribe(self.audio_path)
+        text = self.whisper_model.transcribe(self.audio_path)
         self.logger.info("Transcriptation process finished :)")
 
         try:
