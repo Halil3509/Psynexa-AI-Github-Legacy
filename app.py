@@ -107,7 +107,7 @@ def detect_wave_parkinson():
 def receive_frame():
     try:
         print(request.json)
-        images = request.json['images']
+        json_file = request.json['images']
         
         
             
