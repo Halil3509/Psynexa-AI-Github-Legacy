@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame Capture and Send</title>
+</head>
+<body>
+    <canvas id="myCanvas" width="640" height="480"></canvas>
+    <button onclick="captureFrame()">Capture Frame</button>
+
+    <script>
+        function captureFrame() {
+            var canvas = document.getElementById("myCanvas");
+            var ctx = canvas.getContext("2d");
+
+            // Assuming you have a video element with id="myVideo"
+            var video = document.getElementById("myVideo");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            var base64Data = canvas.toDataURL().split(',')[1];
+
+            var formData = new FormData();
+            formData.append('frame', base64Data);
+
+            fetch('http://127.0.0.1:5000/ai/image_temp', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

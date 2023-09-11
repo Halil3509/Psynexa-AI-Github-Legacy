@@ -62,46 +62,19 @@ def get_audio_temp():
         return jsonify({'error': 'No file uploaded'})
     
     
-
-@app.route('/ai/full_disorder_detection', methods = ['POST'])
-def get_audio():
-    if 'file' not in request.files:
-        return 'No file part'
     
-    file = request.files['file']
-    
-    # If the user submits an empty part without a file, the browser
-    # will send an empty part without a filename.
-    if file.filename == '':
-        return 'No selected file'
-    
-    if file and file.filename.endswith('.m4a'):
-        print("M4a file has been received successfully. ")
-        print(file.filename)
-        return 'File uploaded successfully'
-    
-    return 'Invalid file format. Please upload an M4A file.'
-
 @app.route('/ai/image_temp', methods=['POST'])
-def receive_image():
-    # Get the base64 encoded image from the request
-    base64_image = request.form.get('image')
+def receive_frame():
+    frame_data = request.form.get('frame')
+    # Decode the Base64 data
+    # For example, if you're using Python's base64 module
+    import base64
+    decoded_frame = base64.b64decode(frame_data)
 
-    if base64_image is not None:
-        # Decode the base64 image
-        image_data = base64.b64decode(base64_image)
+    # Process the frame data as needed
+    # ...
 
-        # Specify the file path where you want to save the image
-        file_path = 'received_image.jpg'
-
-        # Save the image
-        with open(file_path, 'wb') as f:
-            f.write(image_data)
-
-        return jsonify({'message': 'Image received and saved successfully'})
-    else:
-        return jsonify({'error': 'No image received'})
-    
+    return jsonify({'message': "Frame received successfully!"})
 
 if __name__ == '__main__':
     run_class = General.Run()
