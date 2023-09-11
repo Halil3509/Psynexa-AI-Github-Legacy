@@ -31,10 +31,10 @@ class ParkinsonDetection():
         """
         
         if type == 'spiral' and model_path is None:
-            model_path ='D:\Psynexa-AI-Github\Parkinson\models\spiral_model.hdf5'
+            model_path ='~/Psynexa-AI-Github/Parkinson/models/spiral_model.hdf5'
 
         elif type == 'wave' and model_path is None:
-            model_path = 'D:\Psynexa-AI-Github\Parkinson\models\wave_model.hdf5'
+            model_path = '~/Psynexa-AI-Github/Parkinson/models/wave_model.hdf5'
             
         else:
             self.logger.error("Type only can be spiral or wave")

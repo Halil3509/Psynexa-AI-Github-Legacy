@@ -4,9 +4,9 @@ import yaml
 import torch
 import whisper
 
-import EyeDetection
-import HeadOscillation
-import SpeechSpeed
+# import EyeDetection
+# import HeadOscillation
+#import SpeechSpeed
 import Parkinson
 import DemantiaClockTest
 import TopicSegmentation
@@ -20,7 +20,7 @@ class Run():
         self._wave_parkinson_class = Parkinson.ParkinsonDetection(type = "wave")
         self._dementia_clock_test_class = DemantiaClockTest.DemantiaClockTestClass() # model_path parameter have already arranged
         self.whisper_model = self.get_whisper_model()
-        self._speech_speed_class = SpeechSpeed.SpeechSpeedClass(whisper_model= self.whisper_model)
+        #self._speech_speed_class = SpeechSpeed.SpeechSpeedClass(whisper_model= self.whisper_model)
         self._ratios = self.get_ratios()
         
     @property

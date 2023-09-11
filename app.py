@@ -68,7 +68,6 @@ def receive_frame():
     frame_data = request.form.get('frame')
     # Decode the Base64 data
     # For example, if you're using Python's base64 module
-    import base64
     decoded_frame = base64.b64decode(frame_data)
 
     # Process the frame data as needed
