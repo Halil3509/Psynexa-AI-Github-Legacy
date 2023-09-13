@@ -3,26 +3,30 @@ import logging
 import yaml
 import torch
 import whisper
+import os
 
-# import EyeDetection
-# import HeadOscillation
-#import SpeechSpeed
+import EyeDetection
+import HeadOscillation
+import SpeechSpeed
 import Parkinson
 import DemantiaClockTest
 import TopicSegmentation
 import DisorderDetection
+import Emotion
+
 
 class Run():
     def __init__(self, fps = 2):
-        # self._eye_class = EyeDetection.ADHD_Calculation(video_path=video_path,fps = fps)
-        # self._head_class = HeadOscillation.Head(video_path=video_path, fps = fps)
         self._spiral_parkinson_class = Parkinson.ParkinsonDetection(type = "spiral")
-        self._wave_parkinson_class = Parkinson.ParkinsonDetection(type = "wave")
+        #self._wave_parkinson_class = Parkinson.ParkinsonDetection(type = "wave")
         #self._dementia_clock_test_class = DemantiaClockTest.DemantiaClockTestClass() # model_path parameter have already arranged
-        #self.whisper_model = self.get_whisper_model()
-        #self._speech_speed_class = SpeechSpeed.SpeechSpeedClass(whisper_model= self.whisper_model)
-        #self._ratios = self.get_ratios()
-        print("hazırızs")
+        #self.whisper_model = self.get_whisper_model()       
+        self._eye_class = EyeDetection.ADHD_Calculation()
+        self._head_class = HeadOscillation.Head()
+        self._emotion_class = Emotion.EmotionDetection()
+        self.speech_speed_class = SpeechSpeed.SpeechSpeedClass()
+        self.ratios = self.get_ratios()
+        print("hazırız")
         
     @property
     def logger(self):
@@ -40,17 +44,20 @@ class Run():
 
         self.logger.info(f"The device is {DEVICE}. ")
 
-        self.logger.info("Model is loading...")
-        model = whisper.load_model("medium", device = DEVICE)
-        self.logger.info("Model is ready :)")
+        self.logger.info("Whisper model is loading...")
+        model = whisper.load_model("small", device = DEVICE)
+        self.logger.info("Whisper model is ready :)")
 
         return model
     
+    
+    
     def speech_to_text(self):
         
-        # Speech to text process
-        self._converted_pure_text = self._whisper_model.transcribe(self._audio_path)['text']
-        self.logger.info("Speech to text process has been finisehd succesfully. ")
+        
+        self.logger.info("Speech to text process is starting...")
+        self.converted_pure_text = self.whisper_model.transcribe(self._audio_path)['text']
+        self.logger.info("Speech to text process has been finised succesfully. ")
         
     
     
@@ -63,25 +70,24 @@ class Run():
       
     
     
-    def analyze_therapy(self):
+    def analyze_therapy(self, video_array):
         """
         Emotion, Eye, Head, Speech Speed, Disorder calculations processes
         """
+
         
+        self.logger.info("Therapy analizing is starting...")
         # Eye Score
-        self._eye_class.calc_eye_score()
+        self._eye_class.api_detection(video_array = video_array)
 
         # Head Score
-        self._head_class.detect_video()
-        
-        # Speech Speed
-        self._speech_speed_class.calculate_speaking_speed()
+        self._head_class.api_detection(video_array = video_array)
         
         # Emotion that will be added
+        self._emotion_class.api_detection(video_array = video_array)
         
         
-        # Disorder Calculation
-    
+
     
     def full_disorder_detection(self, audio_path):
         

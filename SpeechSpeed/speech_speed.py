@@ -5,11 +5,12 @@ import whisper
 import speech_recognition as sr
 import yaml
 
+
+
 class SpeechSpeedClass():
-    def __init__(self, whisper_model):
+    def __init__(self):
         self.speech_range = None
         self.speech_score = None
-        self.whisper_model = whisper_model
         self.range = self.get_range()
         
         
@@ -21,15 +22,15 @@ class SpeechSpeedClass():
             logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
         return self._logger
 
-    def get_range(self, path = './speed_range.yaml'):
+    def get_range(self, path = r'D:\\Psynexa-AI-Github\\SpeechSpeed\\speed_range.yaml'):
         with open(path, 'r') as yaml_file:
             data = yaml.load(yaml_file, Loader=yaml.FullLoader)
             
-            self.logger.info("Range was taken :)")
+            self.logger.info("Range was taken for speech speed :)")
             return data
 
 
-    def calculate_speaking_speed(self, audio_path):
+    def calculate_speaking_speed(self, audio_path, text):
         
         self.audio_path = audio_path
         
@@ -38,19 +39,17 @@ class SpeechSpeedClass():
         with sr.AudioFile(self.audio_path) as source:
             audio = recognizer.record(source)
 
-        self.logger.info("Transcriptation process is starting ...")
-        text = self.whisper_model.transcribe(self.audio_path)
-        self.logger.info("Transcriptation process finished :)")
 
         try:
-            word_count = len(text['text'].split())
+            word_count = len(text.split())
             duration = len(audio.frame_data) / (audio.sample_rate * audio.sample_width)
 
             speaking_speed = word_count / (duration / 60)  # Words per minute
             
             # Return
-            self.return_result(speaking_speed)
-
+            self.save_result(speaking_speed)
+            self.logger.info("Speed Speech Score saved in class succesfully. ")
+            
         except sr.UnknownValueError:
             print("Could not understand audio")
             return None
@@ -60,21 +59,21 @@ class SpeechSpeedClass():
             return None
     
     
-    def return_result(self, result):
+    def save_result(self, result):
         if result < self.range["NORMAL_MIN"]:
             self.speech_range = "depression"
             self.speech_score = result
-            return "depression", result
+            
         
         elif result < self.range['HIGH_MIN']:
             self.speech_range = "normal"
             self.speech_score = result
-            return "normal", result
+            
         
         else:
             self.speech_range = "bipolar",
             self.speech_score = result
-            return "bipolar", result
+            
         
         
         

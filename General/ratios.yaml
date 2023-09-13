@@ -25,8 +25,8 @@ Dementia: {
 
 Parkinson: {
   Spiral: {
-    parkinson: 10, # percent of increased parkinson value
-    healthy: 10 # percent of decreased parkinson value
+    parkinson: 10, # value of increased parkinson value
+    healthy: 10 # value of decreased parkinson value
   },
   Wave: {
     parkinson: 10,

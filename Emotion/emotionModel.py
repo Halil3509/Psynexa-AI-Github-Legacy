@@ -4,11 +4,12 @@ import json
 import numpy as np
 import torch
 from torchvision.transforms import transforms
-from models.resmasking import resmasking_dropout1
+from .models.resmasking import resmasking_dropout1
+import logging
 
-local_checkpoint_path = 'checkpoint/logos_z_masking'
-local_prototxt_path = "checkpoint/deploy.prototxt.txt"
-local_ssd_checkpoint_path = "checkpoint/res10_300x300_ssd_iter_140000.caffemodel"
+local_checkpoint_path = r'D:\Psynexa-AI-Github\Emotion\checkpoint\logos_z_masking'
+local_prototxt_path = r'D:\\Psynexa-AI-Github\\Emotion\\checkpoint\\deploy.prototxt.txt'
+local_ssd_checkpoint_path = r"D:\\Psynexa-AI-Github\\Emotion\\checkpoint\\res10_300x300_ssd_iter_140000.caffemodel"
 
 
 def ensure_color(image):
@@ -28,10 +29,12 @@ def ensure_gray(image):
 
 
 def get_ssd_face_detector():
+    print("Caffe MOdel is loading...")
     ssd_face_detector = cv2.dnn.readNetFromCaffe(
         prototxt=local_prototxt_path,
         caffeModel=local_ssd_checkpoint_path,
     )
+    print("Caffe MOdel is loaded")
     return ssd_face_detector
 
 
@@ -60,12 +63,14 @@ is_cuda = torch.cuda.is_available()
 
 
 def get_emo_model():
+    print("Emotion model is loading.")
     emo_model = resmasking_dropout1(in_channels=3, num_classes=7)
     if is_cuda:
         emo_model.cuda(0)
     state = torch.load(local_checkpoint_path, map_location="cpu")
     emo_model.load_state_dict(state["net"])
     emo_model.eval()
+    print("Emotion Model loaded. ")
     return emo_model
 
 
@@ -89,6 +94,15 @@ class PsynexaModel:
         if face_detector is True:
             self.face_detector = get_ssd_face_detector()
         self.emo_model = get_emo_model()
+
+
+    @property
+    def logger(self):
+        if not hasattr(self, '_logger'):
+            self._logger = logging.getLogger(__name__)
+            # Configure logging settings for this logger
+            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+        return self._logger
 
     @torch.no_grad()
     def detect_emotion_for_single_face_image(self, face_image):

@@ -9,16 +9,18 @@ from tqdm import tqdm
 import plotly.express as px
 import plotly.io as pio
 import json
+import base64
 
 from HeadOscillation import utils
 
+
 class Head():
-    def __init__(self, video_path):
-        self.video_path = self.get_video(video_path=video_path)
+    def __init__(self):
         self.score = None
         self.label = None
+        self.plot_values = None
         self._full_landmarks = self.get_yaml(name = "Landmark")
-        self._range = self.get_yaml(path = "D:\Psynexa-AI-Github\HeadOscillation\head_range.yaml", name = "Range YAML")
+        self._range = self.get_yaml(path = r"D:\\Psynexa-AI-Github\\HeadOscillation\\head_range.yaml", name = "Range YAML")
     
     @property
     def logger(self):
@@ -35,15 +37,18 @@ class Head():
             raise FileNotFoundError(f"{video_path} was not found.")    
         
         
-    def get_yaml(self, path = "D:\Psynexa-AI-Github\HeadOscillation\indexes.yaml", name=  None):
+    def get_yaml(self, path = r"D:\\Psynexa-AI-Github\\HeadOscillation\\indexes.yaml", name=  None):
         with open(path, 'r') as yaml_file:
             data = yaml.load(yaml_file, Loader=yaml.FullLoader)
             
-            full_landmarks = data["HEAD_INDEXES"] + data["CHIN_INDEXES"] + data["RIGHT_EAR"] + data["LEFT_EAR"]
+            if name == "Landmark":
+                full_landmarks = data['HEAD_INDEXES'] + data["CHIN_INDEXES"] + data["RIGHT_EAR"] + data["LEFT_EAR"]
+                self.logger.info(f"{name} is ready for Head :)")
+                return full_landmarks
             
-            self.logger.info(f"{name} is ready :)")
-            return full_landmarks
-      
+            self.logger.info(f"{name} is ready for Head :)")
+            return data
+            
       
     def save_plot(self, fig, name):
         FOLDER_PATH = './HeadOscillation/ResultPlots'
@@ -144,7 +149,7 @@ class Head():
     
     
     
-    def detect_video(self, threshold = 3, patience = None, fps = 2, name = "Normal", plot = False):
+    def detect_video(self, video_path, threshold = 3, patience = None, fps = 2, name = "Normal", plot = False, ):
         
         if patience == None: 
             patience = fps*2
@@ -155,7 +160,7 @@ class Head():
         plot_dict['value'] = []
     
         
-        cap = cv2.VideoCapture(self.video_path) 
+        cap = cv2.VideoCapture(video_path) 
         
         # Load the face detection and face landmark modules from Mediapipe
         mp_face_detection = mp.solutions.face_detection
@@ -242,10 +247,102 @@ class Head():
         self.save_results(plot_dict=plot_dict, name = name, plot = plot)
     
         return plot_dict
+    
+    
+    
+    
+    
+    def api_detection(self,video_array, threshold = 3, patience = 3, name = "Normal", plot = False):
+        
+        self.logger.info("Head API detection process is starting...")
+        
+        counter = 1
+        plot_dict = dict()
+        plot_dict['time'] = []
+        plot_dict['value'] = []
+    
+    
+        # Load the face detection and face landmark modules from Mediapipe
+        mp_face_detection = mp.solutions.face_detection
+        mp_face_mesh = mp.solutions.face_mesh
+        
+        
+        ss_situation = False
+        ref_counter = 0
+
+        self.logger.info("The detecting process is starting...")
+        
+        for base64_frame in tqdm(video_array):
+        
+            
+            #base64 to image
+            img_data = base64.b64decode(base64_frame)
+            nparr = np.frombuffer(img_data, np.uint8)
+            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
+            if ss_situation == False:
+                ss_situation  = True
+                reference_img_landmarks = utils.detect_face_landmarks(frame, mp_face_mesh, mp_face_detection)
+                reference_img_modified_array = utils.calc_mean_landmarks(reference_img_landmarks, self._full_landmarks)
+                ref_counter = 0
+                self.logger.info('Reference Image has been taken firstly.')
+
+
+            # We are just checking existence of frame number in selected frame that was selected randomly
+            if ss_situation:
+                
+                landmarks = utils.detect_face_landmarks(frame, mp_face_mesh, mp_face_detection)
+                modified_array = utils.calc_mean_landmarks(landmarks, self._full_landmarks)
+                
+                deviation = np.abs(reference_img_modified_array -  modified_array)
+                
+                sum_array = np.sum(deviation)
+                
+                if sum_array > threshold: 
+                    ref_counter +=1
+                    if ref_counter >= patience:
+                        # Change reference image
+                        reference_img_landmarks = utils.detect_face_landmarks(frame, mp_face_mesh, mp_face_detection)
+                        reference_img_modified_array = utils.calc_mean_landmarks(reference_img_landmarks, self._full_landmarks)
+                        ref_counter = 0
+                        self.logger.info('Reference Image has been changed.')
+                else: 
+                    ref_counter = 0
+                
+                
+                plot_dict['value'].append(sum_array)
+                plot_dict['time'].append(counter)
+
+        
+        self.logger.info("Detecting process finished successfully. Let's save results")
+        
+        # Save Plot Values
+        self.plot_values = plot_dict
+        
+        # Save Other Results
+        self.save_results(plot_dict=plot_dict, name = name, plot = plot)
+    
+        return plot_dict
+    
 
 
 
     def save_results(self, plot_dict, name = None, plot = False):
+        """_summary_
+
+        Args:
+            plot_dict (_type_): _description_
+            name (_type_, optional): _description_. Defaults to None.
+            plot (bool, optional): _description_. Defaults to False.
+        
+        return => 
+        score: {
+            "Variance": x,
+            "Mean":x,
+            "Std":x
+        }
+        label: str
+        """
         
         result_dict = dict()
         
@@ -253,11 +350,13 @@ class Head():
         result_dict["Mean"] = np.round(np.mean(plot_dict["value"]), 2)
         result_dict["Std"] = np.round(np.std(plot_dict["value"]), 2)
         
-        FOLDER_PATH = "./HeadOscillation/ResultsJSON"
-        if not os.path.exists(FOLDER_PATH):
-            os.mkdir(FOLDER_PATH)
-            
-        file_path = os.path.join(FOLDER_PATH, )
+        
+        ### *** Save as JSON ***  
+        # FOLDER_PATH = "./HeadOscillation/ResultsJSON"
+        # if not os.path.exists(FOLDER_PATH):
+        #     os.mkdir(FOLDER_PATH)  
+        
+        # file_path = os.path.join(FOLDER_PATH, )
         # with open(file_path, "w") as json_file:
         #     json.dump(result_dict, json_file, indent = 4)
         #     self.logger.info(f"Json results was saved successfully into {FOLDER_PATH}")
@@ -276,13 +375,13 @@ class Head():
         
     def specify_label(self):
         
-        if self.score < self._range["Head"]["NORMAL"]:
+        if self.score["Variance"] < self._range["Head"]["NORMAL"]:
             self.label = "normal"
-        elif self.score < self._range["Head"]["MIN_THRESHOLD"]:
+        elif self.score["Variance"] < self._range["Head"]["MIN_THRESHOLD"]:
             self.label = "low_ADHD"
-        elif self.score < self._range["Head"]["NORMAL_THRESHOLD"]:
+        elif self.score["Variance"] < self._range["Head"]["NORMAL_THRESHOLD"]:
             self.label = "normal_ADHD"
-        elif self.score < self._range["Head"]["HIGH_THRESHOLD"]:
+        elif self.score["Variance"] < self._range["Head"]["HIGH_THRESHOLD"]:
             self.label = "high_ADHD"
         else:
             self.label = "anomaly"
