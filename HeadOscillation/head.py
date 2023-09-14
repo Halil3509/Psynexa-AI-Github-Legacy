@@ -366,22 +366,21 @@ class Head():
         self.logger.info("Score is saved into class's head score property.")
         
         #specify label
-        self.specify_label()
         
         if plot:  
             # Save Draw settings
             self.draw_plot(plot_dict=plot_dict, name = name)
         
         
-    def specify_label(self):
+    def specify_label(self, score):
         
-        if self.score["Variance"] < self._range["Head"]["NORMAL"]:
+        if score < self._range["Head"]["NORMAL"]:
             self.label = "normal"
-        elif self.score["Variance"] < self._range["Head"]["MIN_THRESHOLD"]:
+        elif score < self._range["Head"]["MIN_THRESHOLD"]:
             self.label = "low_ADHD"
-        elif self.score["Variance"] < self._range["Head"]["NORMAL_THRESHOLD"]:
+        elif score < self._range["Head"]["NORMAL_THRESHOLD"]:
             self.label = "normal_ADHD"
-        elif self.score["Variance"] < self._range["Head"]["HIGH_THRESHOLD"]:
+        elif score < self._range["Head"]["HIGH_THRESHOLD"]:
             self.label = "high_ADHD"
         else:
             self.label = "anomaly"

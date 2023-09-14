@@ -228,23 +228,23 @@ class ADHD_Calculation():
         self.logger.info(f"{plot_name} video score is {self.score} :)")
         
         # Assign Label
-        self.specify_label()
+        #self.specify_label()
          
         return plot_dict    
     
     
-    def specify_label(self):
+    def specify_label(self, score):
         """
         result => 
         score: number(float)
         label: str
         """
         
-        if self.score < self._range["DEHB"]["MIN_THRESHOLD"]:
+        if score < self._range["DEHB"]["MIN_THRESHOLD"]:
             self.label = "normal"
-        elif self.score >= self._range["DEHB"]["MIN_THRESHOLD"]:
+        elif score >= self._range["DEHB"]["MIN_THRESHOLD"]:
             self.label = "low_ADHD"
-        elif self.score < self._range["DEHB"]["NORMAL_THRESHOLD"]:
+        elif score < self._range["DEHB"]["NORMAL_THRESHOLD"]:
             self.label = "normal_ADHD"
         else:
             self.label = "high_ADHD"
