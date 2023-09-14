@@ -1,5 +1,10 @@
 
-TopicSegmentation/py-googletrans/
+Emotion/configs/fer2013_config.json
+Emotion/checkpoint/
 *.jpg
 *.png
-__pycache__/
+**/__pycache__/
+*.pt
+*.wav
+*.m4a
+*.ipynb

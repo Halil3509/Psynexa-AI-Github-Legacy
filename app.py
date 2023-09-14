@@ -6,7 +6,8 @@ import cv2
 import json
 from flask_cors import CORS 
 import General
-
+import time
+import threading
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -16,6 +17,21 @@ cors = CORS(app)
 data = {}
 
 run_class = General.Run()
+
+
+# definings
+last_request_time = time.time()
+frame_buffer = []
+eye_scores = []
+head_scores = []
+
+emotion_dict = dict()
+emotion_dict["time"] = []
+emotion_dict["value"] = []
+
+head_plot_dict = dict()
+head_plot_dict["time"] = []
+head_plot_dict["value"] = []
 
 
 def upload_audio(file):
@@ -214,67 +230,116 @@ def receive_frame():
 
     except Exception as e:
         return jsonify({'message': str(e)}), 500
+
+
+
+def chane_ratio_analyzing_video():
     
+    # Specify Labels
+    run_class._eye_class.specify_label(np.mean(eye_scores))
+    run_class._head_class.specify_label(np.mean(head_scores))
     
+    total_disorder_results =  {
+        "Agorafobi": 0.1,
+        "Bipolar": 0.1,
+        "Borderline": 0.1,
+        "Cinsel İlişkili Bozukluklar": 0.0,
+        "DEHB": 90.9,
+        "Demans": 8.1,
+        "Depresyon": 0.0,
+        "Madde ile ilişkili bozukluklar": 0.1,
+        "OKB": 0.3,
+        "Paranoid": 0.0,
+        "Parkinson": 0.1,
+        "Sosyal Fobi": 0.1,
+        "Yeme Bozuklukları": 0.0 } # get with request
+    
+    # Eye
+    if run_class._eye_class.label != 'normal':
+        total_disorder_results = General.change_ratios(values_dict= total_disorder_results, 
+                            value= run_class.ratios["Eye"][run_class._eye_class.label],
+                            name = "DEHB", type = "inc")
+
+    # Head
+    if run_class._head_class.label != 'normal':
+        total_disorder_results = General.change_ratios(values_dict=total_disorder_results,
+                            value=run_class.ratios["Head"][run_class._head_class.label],
+                            name = "DEHB", type = "inc")
+    
+    head_result_plot_json = [
+        {"time": t, "value": v} 
+        for t, v in zip(head_plot_dict["time"], head_plot_dict["value"])
+    ]
+    
+    print({'result': {
+    "Message":"Analyzing therapy process finished succesfully",
+    "Eye":{
+        "eye_label":run_class._eye_class.label,
+        "score":np.mean(eye_scores)
+    },
+    "Head":{
+        "label":run_class._head_class.label,
+        "score":np.mean(head_scores),
+        "plot_values":head_result_plot_json
+    },
+    "Emotion":{
+        "plot_values": emotion_dict
+    },
+    "General_results": total_disorder_results
+        }}), 200
+
+
+def track_last_request():
+    global last_request_time
+    while True:
+        print(time.time() - last_request_time)
+        if time.time() - last_request_time > 60:
+            # Do something after 1 minute of no requests
+            
+            chane_ratio_analyzing_video()
+            last_request_time = time.time()
+        time.sleep(1)
+
+# Start the thread to track requests
+tracker_thread = threading.Thread(target=track_last_request)
+tracker_thread.daemon = True
+tracker_thread.start()
+
+
+
 @app.route('/ai/video_analyze', methods=['POST'])
 def analyze_video():
     try:
         data = request.json  # Assuming the request contains a JSON body
-        images = data.get("images", [])
+        image = data.get("image")
+        
+        global last_request_time
+        global frame_buffer
+        
+        last_request_time = time.time()
+        frame_buffer.append(image)
+        
+        
+        if len(frame_buffer) > 20:
+            
+            # Run whole analysis
+            run_class.analyze_therapy(frame_buffer)
+            frame_buffer = []
+            
+            eye_scores.append(run_class._eye_class.score)
+            head_scores.append(run_class._head_class.score["Variance"])
+            head_plot_dict["time"].extend(run_class._head_class.plot_values["time"])
+            head_plot_dict["value"].extend(run_class._head_class.plot_values["value"])
 
+            
+            emotion_dict["time"].extend(run_class._emotion_class.plot_dict["time"])
+            emotion_dict["value"].extend(run_class._emotion_class.plot_dict["value"])
+            
+           
         
-        # Run whole analyze
-        run_class.analyze_therapy(images)
-        
-        total_disorder_results =  {
-            "Agorafobi": 0.1,
-            "Bipolar": 0.1,
-            "Borderline": 0.1,
-            "Cinsel İlişkili Bozukluklar": 0.0,
-            "DEHB": 90.9,
-            "Demans": 8.1,
-            "Depresyon": 0.0,
-            "Madde ile ilişkili bozukluklar": 0.1,
-            "OKB": 0.3,
-            "Paranoid": 0.0,
-            "Parkinson": 0.1,
-            "Sosyal Fobi": 0.1,
-            "Yeme Bozuklukları": 0.0  } # get with request
-        
-                
-        # Adding ratio processes
-        
-        # Eye
-        if run_class._eye_class.label != 'normal':
-            total_disorder_results = General.change_ratios(values_dict= total_disorder_results, 
-                                  value= run_class.ratios["Eye"][run_class._eye_class.label],
-                                name = "DEHB", type = "inc")
     
-        # Head
-        if run_class._head_class.label != 'normal':
-            total_disorder_results = General.change_ratios(values_dict=total_disorder_results,
-                                  value=run_class.ratios["Head"][run_class._head_class.label],
-                                  name = "DEHB", type = "inc")
-         
-        
-        
-        return jsonify({'result': {
-            "Message":"Analyzing therapy process finished succesfully",
-            "Eye":{
-                "eye_label":run_class._eye_class.label,
-                "score":run_class._eye_class.score
-            },
-            "Head":{
-                "label":run_class._head_class.label,
-                "score":run_class._head_class.score,
-                "plot_values":run_class._head_class.plot_values
-            },
-            "Emotion":{
-                "plot_values": run_class._emotion_class.plot_dict
-            },
-            "General_results": total_disorder_results
-        }}), 200
-        
+        return jsonify({"message": "Thanks"})
+    
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
