@@ -25,7 +25,7 @@ class DemantiaClockTestClass():
         Args:
             model_path (_type_, optional): _description_. Defaults to None.
         """
-        model_path = "D:\Psynexa-AI-Github\DemantiaClockTest\models\demantia.hdf5"
+        model_path = "/home/halil7hatun/Psynexa-AI-Github/DemantiaClockTest/models/demantia.hdf5"
         
         self.logger.info("Demantia Clock Test model is loading ...")
         model = load_model(model_path)

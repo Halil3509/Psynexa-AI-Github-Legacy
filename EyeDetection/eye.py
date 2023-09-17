@@ -18,7 +18,7 @@ class ADHD_Calculation():
         self.score = None
         self.label = None # Result Label
         self._coords = self.get_yaml_file()
-        self._range = self.get_yaml_file(r"D:\\Psynexa-AI-Github\\EyeDetection\\eye_range.yaml")
+        self._range = self.get_yaml_file("/home/halil7hatun/Psynexa-AI-Github/EyeDetection/eye_range.yaml")
         
         
     @property

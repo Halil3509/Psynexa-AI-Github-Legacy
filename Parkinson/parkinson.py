@@ -10,7 +10,7 @@ class ParkinsonDetection():
     def __init__(self, model_path = None, type = 'spiral'):
         self.ratio = None,
         self.estimated_label = None,
-        self.model = self.get_model(model_path=model_path, type= type)
+        self.model = self.get_model(model_path=model_path, type=type)
         self.classes = ['healthy', 'parkinson']
         
     @property
@@ -31,17 +31,18 @@ class ParkinsonDetection():
         """
         
         if type == 'spiral' and model_path is None:
-            model_path ='D:\Psynexa-AI-Github\Parkinson\models\spiral_model.hdf5'
+            model_path ='/home/halil7hatun/Psynexa-AI-Github/Parkinson/models/spiral_model.hdf5'
 
         elif type == 'wave' and model_path is None:
-            model_path = 'D:\Psynexa-AI-Github\Parkinson\models\wave_model.hdf5'
+            model_path = '/home/halil7hatun/Psynexa-AI-Github/Parkinson/models/wave_model.hdf5'
             
         else:
             self.logger.error("Type only can be spiral or wave")
         
-        self.logger.info(f"{type} model is loading ...")
+        self.logger.info(f"{type} model is loading...")
         model = load_model(model_path)
         self.logger.info(f"{type} model loaded succesfully.")
+        
         return model
 
 

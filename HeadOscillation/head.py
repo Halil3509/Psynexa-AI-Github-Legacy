@@ -20,7 +20,7 @@ class Head():
         self.label = None
         self.plot_values = None
         self._full_landmarks = self.get_yaml(name = "Landmark")
-        self._range = self.get_yaml(path = r"D:\\Psynexa-AI-Github\\HeadOscillation\\head_range.yaml", name = "Range YAML")
+        self._range = self.get_yaml(path = "/home/halil7hatun/Psynexa-AI-Github/HeadOscillation/head_range.yaml", name = "Range YAML")
     
     @property
     def logger(self):
