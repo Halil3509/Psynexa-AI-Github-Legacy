@@ -9,7 +9,7 @@ class TopicSegmentation():
     def __init__(self, pure_text):
         self.text = pure_text
         self.not_necessary_words = self._get_not_necessary_word()
-        self.ftest = open(r"D:\Psynexa-AI-Github\TopicSegmentation\requirements\turkce-stop-words-small.txt",encoding="utf-8").read().split("\n")
+        self.ftest = open("/home/halil7hatun/Psynexa-AI-Github/TopicSegmentation/requirements/turkce-stop-words-small.txt",encoding="utf-8").read().split("\n")
 
 
     @property

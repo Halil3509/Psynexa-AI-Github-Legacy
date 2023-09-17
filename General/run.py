@@ -62,7 +62,7 @@ class Run():
         
     
     
-    def get_ratios(self, path = r"D:\\Psynexa-AI-Github\\General\\ratios.yaml"):
+    def get_ratios(self, path = "/home/halil7hatun/Psynexa-AI-Github/General/ratios.yaml"):
         with open(path, 'r') as yaml_file:
             data = yaml.load(yaml_file, Loader=yaml.FullLoader)
             

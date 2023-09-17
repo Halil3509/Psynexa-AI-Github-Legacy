@@ -22,7 +22,7 @@ class SpeechSpeedClass():
             logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
         return self._logger
 
-    def get_range(self, path = r'D:\\Psynexa-AI-Github\\SpeechSpeed\\speed_range.yaml'):
+    def get_range(self, path = '/home/halil7hatun/Psynexa-AI-Github/SpeechSpeed/speed_range.yaml'):
         with open(path, 'r') as yaml_file:
             data = yaml.load(yaml_file, Loader=yaml.FullLoader)
             
