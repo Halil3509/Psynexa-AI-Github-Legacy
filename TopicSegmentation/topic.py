@@ -22,7 +22,7 @@ class TopicSegmentation():
         
         
     def _get_not_necessary_word(self, yaml_path = ""):
-        with open(r'D:\Psynexa-AI-Github\TopicSegmentation\not_necessary_word_.yaml', 'r') as file:
+        with open('/home/halil7hatun/Psynexa-AI-Github/TopicSegmentation/not_necessary_word_.yaml', 'r') as file:
             # Load the YAML data into a Python variable
             data = yaml.load(file, Loader=yaml.FullLoader)
             
