@@ -1,5 +1,5 @@
 import torch
-import json 
+import yaml
 import logging
 from transformers import BertTokenizer
 import numpy as np
@@ -8,8 +8,8 @@ class DisorderDetection():
     def __init__(self, topic_texts):
         self.topic_texts = topic_texts
         self.label_classes = self._get_label_classes()
-        self.model = self._get_model()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.model = self._get_model()
         self.tokenizer = self._get_tokenizer()
         
         
@@ -61,9 +61,9 @@ class DisorderDetection():
     
     
     def _get_tokenizer(model_name = "dbmdz/bert-base-turkish-128k-uncased"):
-        return BertTokenizer.from_pretrained(model_name, do_lower_case=True)
+        return BertTokenizer.from_pretrained("dbmdz/bert-base-turkish-128k-uncased", do_lower_case=True)
     
-    def _get_model(self, model_path = r"D:\\Psynexa-AI-Github\\DisorderDetection\\models\\bert_alpha_v3.pt"):
+    def _get_model(self, model_path = r"D:\\Psynexa-AI-Github\\DisorderDetection\\models\\bert_alpha_v4.pt"):
         try:
             model = torch.load(model_path, map_location=self.device)
             model.eval()
@@ -73,12 +73,13 @@ class DisorderDetection():
             raise TypeError("DL model must be entire saved model.")
             
             
-    def _get_label_classes(self, seslf, path = ""):
-        with open('data.json', 'r') as file:
-            # Load the JSON data
-            data = json.load(file)
-            self.logger.info("Label classes was read")
-            return data
+    def _get_label_classes(self, path = r"D:\Psynexa-AI-Github\DisorderDetection\label_classes.yaml"):
+        with open(path, 'r') as file:
+            # Load the YAML data into a Python variable
+            data = yaml.load(file, Loader=yaml.FullLoader)
+            
+            self.logger.info("Label classes has been uploaded")
+            return data['label_classes']
 
             
         
@@ -116,16 +117,17 @@ class DisorderDetection():
             
     def run_disorder_detection(self):
         total_result_dict = dict()
-        for label in self.label_classes.values():
+        for label in self.label_classes:
             total_result_dict[label] = 0
         
-        for text in self.topic_texts:
+        
+        for text in self.topic_texts["Text"].values:
             if len(text) > 512:
                 chunks = self.split_text(text)
                 new_result_dict = self.chunks_disorder_detection(chunks)
 
             else:
-                new_result_dict = self.predict(text, self.model, max_len = len(text))
+                new_result_dict = self.predict(text, max_len = len(text))
 
             total_result_dict = self.sum_dicts(total_result_dict, new_result_dict)
 

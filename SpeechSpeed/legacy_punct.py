@@ -61,7 +61,6 @@ class LegacyPunctuation():
                 end_index = punct['end']
                     
                 text = self.replace_char_at_index(text, end_index, ".")
-                
         self.logger.info("Punctuation process finished.")
         return text
         

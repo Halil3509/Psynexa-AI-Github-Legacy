@@ -17,14 +17,15 @@ import Emotion
 
 class Run():
     def __init__(self, fps = 2):
-        self._spiral_parkinson_class = Parkinson.ParkinsonDetection(type = "spiral")
+        #self._spiral_parkinson_class = Parkinson.ParkinsonDetection(type = "spiral")
         #self._wave_parkinson_class = Parkinson.ParkinsonDetection(type = "wave")
         #self._dementia_clock_test_class = DemantiaClockTest.DemantiaClockTestClass() # model_path parameter have already arranged
         #self.whisper_model = self.get_whisper_model()       
-        self._eye_class = EyeDetection.ADHD_Calculation()
-        self._head_class = HeadOscillation.Head()
-        self._emotion_class = Emotion.EmotionDetection()
+        #self._eye_class = EyeDetection.ADHD_Calculation()
+        #self._head_class = HeadOscillation.Head()
+        #self._emotion_class = Emotion.EmotionDetection()
         self.speech_speed_class = SpeechSpeed.SpeechSpeedClass()
+        self._legacy_punct_model = SpeechSpeed.LegacyPunctuation()
         self.ratios = self.get_ratios()
         print("hazırız")
         
@@ -108,7 +109,26 @@ class Run():
         self.logger.info("Full Disorder Detection process was finished.")
         
         return total_disorder_result_json
-   
+    
+    
+    def full_disorder_detection_legacy(self, audio_text):
+        
+        self.logger.info("Full Disorder Detection Legacy process is starting...")
+        
+        self._converted_pure_text = audio_text
+        
+        # Convert text and eliminate  (Topic Side)
+        topic_class = TopicSegmentation.TopicSegmentation(self._converted_pure_text)
+        topic_texts = topic_class.convert_text_and_eliminate()
+        
+        # Disorder Part
+        disorder_class = DisorderDetection.DisorderDetection(topic_texts=topic_texts)
+        total_disorder_result_json = disorder_class.run_disorder_detection()
+        
+        self.logger.info("Full Disorder Detection Legacy process was finished.")
+        
+        return total_disorder_result_json
+    
 
     
     def statistical_touch(self):

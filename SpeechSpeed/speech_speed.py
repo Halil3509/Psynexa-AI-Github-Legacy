@@ -60,6 +60,7 @@ class SpeechSpeedClass():
     
     
     def save_result(self, result):
+        result = int(result)
         if result < self.range["NORMAL_MIN"]:
             self.speech_range = "depression"
             self.speech_score = result
@@ -73,6 +74,8 @@ class SpeechSpeedClass():
         else:
             self.speech_range = "bipolar",
             self.speech_score = result
+            
+        self.logger.info("Speech Speed Score has been saved.")
             
         
         

@@ -88,11 +88,6 @@ def get_audio_temp():
                 name=disorder_name,
                 type='inc'
             )
-                
-        ## Add speech speed ratio to general
-        General.change_ratios(values_dict=total_disorder_json,
-                              value=run_class.ratios["Speech"][run_class.speech_speed_class.speech_range],
-                              name="")
         
         return jsonify({"message": "işlem başarılı",
                         "total_disorder_json": total_disorder_json, 
@@ -104,6 +99,50 @@ def get_audio_temp():
     else:
         return jsonify({'error': 'No file uploaded'})
     
+    
+
+@app.route('/ai/legacy_audio_temp', methods = ['POST'])
+def get_audio_temp_legacy():
+    print(request.files)
+    data = request.json 
+    text = data.get("text")
+    speed_score = data.get("speech_speed")
+
+    puncted_text = run_class._legacy_punct_model.add_punct(text)
+    
+    print(puncted_text)
+    
+    total_disorder_json = run_class.full_disorder_detection_legacy(audio_text=puncted_text)
+    
+    # Save and clasify speed score
+    run_class.speech_speed_class.save_result(speed_score)
+    
+    
+    range_to_disorder = {
+            'bipolar': 'Bipolar',
+            'depression': 'Depresyon'
+        }
+        
+    ## Adding ratio part
+    speed_range = run_class.speech_speed_class.speech_range
+
+
+    disorder_name = range_to_disorder[speed_range]
+
+    # Add speech speed ratio to general
+    General.change_ratios(
+        values_dict=total_disorder_json,
+        value=run_class.ratios["Speech"][speed_range],
+        name=disorder_name,
+        type='inc'
+    )
+    
+    return jsonify({"message": "işlem başarılı",
+                    "total_disorder_json": total_disorder_json, 
+                    "speech_speed":{
+                        "ratio":run_class.speech_speed_class.speech_score,
+                        "label": speed_range}
+                    })
 
 
 
@@ -300,10 +339,10 @@ def track_last_request():
             last_request_time = time.time()
         time.sleep(1)
 
-# Start the thread to track requests
-tracker_thread = threading.Thread(target=track_last_request)
-tracker_thread.daemon = True
-tracker_thread.start()
+# # Start the thread to track requests
+# tracker_thread = threading.Thread(target=track_last_request)
+# tracker_thread.daemon = True
+# tracker_thread.start()
 
 
 

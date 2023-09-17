@@ -9,7 +9,7 @@ class TopicSegmentation():
     def __init__(self, pure_text):
         self.text = pure_text
         self.not_necessary_words = self._get_not_necessary_word()
-        self.ftest = open("D:\Psynexa-AI-Github\TopicSegmentation\requirements\turkce-stop-words-small.txt",encoding="utf-8").read().split("\n")
+        self.ftest = open(r"D:\Psynexa-AI-Github\TopicSegmentation\requirements\turkce-stop-words-small.txt",encoding="utf-8").read().split("\n")
 
 
     @property
@@ -22,7 +22,7 @@ class TopicSegmentation():
         
         
     def _get_not_necessary_word(self, yaml_path = ""):
-        with open('data.yaml', 'r') as file:
+        with open(r'D:\Psynexa-AI-Github\TopicSegmentation\not_necessary_word_.yaml', 'r') as file:
             # Load the YAML data into a Python variable
             data = yaml.load(file, Loader=yaml.FullLoader)
             
@@ -121,6 +121,7 @@ class TopicSegmentation():
         index = 0
         concat_counter = 0
 
+
         for i, sent in enumerate(text.split(".")):
             if i == 0:
                 edited_list.insert(0, sent)
@@ -129,14 +130,14 @@ class TopicSegmentation():
                 last_tokenized_sent = self.apply_all(edited_list[-1])
                 tokenized_sent = self.apply_all(sent)
 
-            if len(set(last_tokenized_sent) & set(tokenized_sent)) > 0:
-                new_sentence = f"{edited_list[-1]}. {sent}"
-                edited_list[index] = new_sentence
-                concat_counter +=1
+                if len(set(last_tokenized_sent) & set(tokenized_sent)) > 0:
+                    new_sentence = f"{edited_list[-1]}. {sent}"
+                    edited_list[index] = new_sentence
+                    concat_counter +=1
 
-            else:
-                index += 1
-                edited_list.insert(index, sent)
+                else:
+                    index += 1
+                    edited_list.insert(index, sent)
 
 
         self.logger.info("Manual Concatenation progress finished")

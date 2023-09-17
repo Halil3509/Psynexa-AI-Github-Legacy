@@ -1,1 +1,2 @@
 from SpeechSpeed.speech_speed import SpeechSpeedClass
+from SpeechSpeed.legacy_punct import LegacyPunctuation
