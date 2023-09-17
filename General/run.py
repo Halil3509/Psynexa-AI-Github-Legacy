@@ -11,7 +11,7 @@ import Parkinson
 import DemantiaClockTest
 import TopicSegmentation
 import DisorderDetection
-import Emotion
+#import Emotion
 
 
 class Run():
@@ -22,7 +22,7 @@ class Run():
         #self.whisper_model = self.get_whisper_model()       
         self._eye_class = EyeDetection.ADHD_Calculation()
         self._head_class = HeadOscillation.Head()
-        self._emotion_class = Emotion.EmotionDetection()
+        #self._emotion_class = Emotion.EmotionDetection()
         self.speech_speed_class = SpeechSpeed.SpeechSpeedClass()
         self._legacy_punct_model = SpeechSpeed.LegacyPunctuation()
         self.ratios = self.get_ratios()
