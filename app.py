@@ -10,7 +10,7 @@ import time
 import threading
 
 app = Flask(__name__)
-cors = CORS(app)
+CORS(app)
 
 
 # Define a dictionary to store data (in-memory database for this example)

@@ -86,7 +86,7 @@ class Run():
         self._head_class.api_detection(video_array = video_array)
         
         # Emotion that will be added
-        self._emotion_class.api_detection(video_array = video_array)
+        #self._emotion_class.api_detection(video_array = video_array)
         
         
 
