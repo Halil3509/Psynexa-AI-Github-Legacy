@@ -26,7 +26,7 @@ class Run():
         #self._emotion_class = Emotion.EmotionDetection()
         self.speech_speed_class = SpeechSpeed.SpeechSpeedClass()
         self._legacy_punct_model = SpeechSpeed.LegacyPunctuation()
-        self._chat_bot = ChatBot.ChatBot()
+        self._chatbot = ChatBot.ChatBot()
         self.ratios = self.get_ratios()
         print("hazırız")
         
