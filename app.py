@@ -383,6 +383,15 @@ def analyze_video():
         print(e)
         return jsonify({"error": str(e)}), 500
     
+    
+@app.route('/ai/send_message_nexa', methods=['POST'])
+def chatbot_message():
+    data = request.json
+    message = data.get("message")
+    
+    response = run_class._chatbot.predict_api(text=message)
+    
+    return jsonify({"Nexa": response})
 
     
 if __name__ == '__main__':
