@@ -21,9 +21,9 @@ class Run():
         #self._wave_parkinson_class = Parkinson.ParkinsonDetection(type = "wave")
         #self._dementia_clock_test_class = DemantiaClockTest.DemantiaClockTestClass() # model_path parameter have already arranged
         #self.whisper_model = self.get_whisper_model()       
-        #self._eye_class = EyeDetection.ADHD_Calculation()
-        #self._head_class = HeadOscillation.Head()
-        #self._emotion_class = Emotion.EmotionDetection()
+        self._eye_class = EyeDetection.ADHD_Calculation()
+        self._head_class = HeadOscillation.Head()
+        self._emotion_class = Emotion.EmotionDetection()
         self.speech_speed_class = SpeechSpeed.SpeechSpeedClass()
         self._legacy_punct_model = SpeechSpeed.LegacyPunctuation()
         self._chatbot = ChatBot.ChatBot()
