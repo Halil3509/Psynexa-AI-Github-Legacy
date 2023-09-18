@@ -29,7 +29,7 @@ class ADHD_Calculation():
             logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
         return self._logger
     
-    def get_yaml_file(self, file_path = r'D:\\Psynexa-AI-Github\\EyeDetection\\landmarks.yaml'):
+    def get_yaml_file(self, file_path = '/home/halil7hatun/Psynexa-AI-Github/EyeDetection/landmarks.yaml'):
         try:
             with open(file_path, 'r') as yaml_file:
                 yaml_data = yaml.safe_load(yaml_file)

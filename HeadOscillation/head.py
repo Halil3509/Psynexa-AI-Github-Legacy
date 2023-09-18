@@ -37,7 +37,7 @@ class Head():
             raise FileNotFoundError(f"{video_path} was not found.")    
         
         
-    def get_yaml(self, path = r"D:\\Psynexa-AI-Github\\HeadOscillation\\indexes.yaml", name=  None):
+    def get_yaml(self, path = "/home/halil7hatun/Psynexa-AI-Github/HeadOscillation/indexes.yaml", name=  None):
         with open(path, 'r') as yaml_file:
             data = yaml.load(yaml_file, Loader=yaml.FullLoader)
             
