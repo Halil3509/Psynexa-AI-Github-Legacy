@@ -12,7 +12,7 @@ import DemantiaClockTest
 import TopicSegmentation
 import DisorderDetection
 import ChatBot
-#import Emotion
+import Emotion
 
 
 class Run():
