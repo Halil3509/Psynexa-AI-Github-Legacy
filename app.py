@@ -274,6 +274,8 @@ def receive_frame():
 
 def chane_ratio_analyzing_video():
     
+    global last_request_time
+    
     # Specify Labels
     run_class._eye_class.specify_label(np.mean(eye_scores))
     run_class._head_class.specify_label(np.mean(head_scores))
@@ -293,39 +295,42 @@ def chane_ratio_analyzing_video():
         "Sosyal Fobi": 0.1,
         "Yeme Bozuklukları": 0.0 } # get with request
     
-    # Eye
-    if run_class._eye_class.label != 'normal':
-        total_disorder_results = General.change_ratios(values_dict= total_disorder_results, 
-                            value= run_class.ratios["Eye"][run_class._eye_class.label],
-                            name = "DEHB", type = "inc")
+    if len(frame_buffer) == 0:
+        last_request_time = time.time()
+    else:
+        # Eye
+        if run_class._eye_class.label != 'normal':
+            total_disorder_results = General.change_ratios(values_dict= total_disorder_results, 
+                                value= run_class.ratios["Eye"][run_class._eye_class.label],
+                                name = "DEHB", type = "inc")
 
-    # Head
-    if run_class._head_class.label != 'normal':
-        total_disorder_results = General.change_ratios(values_dict=total_disorder_results,
-                            value=run_class.ratios["Head"][run_class._head_class.label],
-                            name = "DEHB", type = "inc")
-    
-    head_result_plot_json = [
-        {"time": t, "value": v} 
-        for t, v in zip(head_plot_dict["time"], head_plot_dict["value"])
-    ]
-    
-    print({'result': {
-    "Message":"Analyzing therapy process finished succesfully",
-    "Eye":{
-        "eye_label":run_class._eye_class.label,
-        "score":np.mean(eye_scores)
-    },
-    "Head":{
-        "label":run_class._head_class.label,
-        "score":np.mean(head_scores),
-        "plot_values":head_result_plot_json
-    },
-    "Emotion":{
-        "plot_values": emotion_dict
-    },
-    "General_results": total_disorder_results
-        }}), 200
+        # Head
+        if run_class._head_class.label != 'normal':
+            total_disorder_results = General.change_ratios(values_dict=total_disorder_results,
+                                value=run_class.ratios["Head"][run_class._head_class.label],
+                                name = "DEHB", type = "inc")
+        
+        head_result_plot_json = [
+            {"time": t, "value": v} 
+            for t, v in zip(head_plot_dict["time"], head_plot_dict["value"])
+        ]
+        
+        print({'result': {
+        "Message":"Analyzing therapy process finished succesfully",
+        "Eye":{
+            "eye_label":run_class._eye_class.label,
+            "score":np.mean(eye_scores)
+        },
+        "Head":{
+            "label":run_class._head_class.label,
+            "score":np.mean(head_scores),
+            "plot_values":head_result_plot_json
+        },
+        # "Emotion":{
+        #     "plot_values": emotion_dict
+        # },
+        "General_results": total_disorder_results
+            }}), 200
 
 
 def track_last_request():
@@ -339,10 +344,10 @@ def track_last_request():
             last_request_time = time.time()
         time.sleep(1)
 
-# # Start the thread to track requests
-# tracker_thread = threading.Thread(target=track_last_request)
-# tracker_thread.daemon = True
-# tracker_thread.start()
+# Start the thread to track requests
+tracker_thread = threading.Thread(target=track_last_request)
+tracker_thread.daemon = True
+tracker_thread.start()
 
 
 
@@ -371,8 +376,8 @@ def analyze_video():
             head_plot_dict["value"].extend(run_class._head_class.plot_values["value"])
 
             
-            emotion_dict["time"].extend(run_class._emotion_class.plot_dict["time"])
-            emotion_dict["value"].extend(run_class._emotion_class.plot_dict["value"])
+            #emotion_dict["time"].extend(run_class._emotion_class.plot_dict["time"])
+            #emotion_dict["value"].extend(run_class._emotion_class.plot_dict["value"])
             
            
         
