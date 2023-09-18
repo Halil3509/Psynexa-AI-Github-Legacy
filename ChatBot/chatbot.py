@@ -1,12 +1,21 @@
 from transformers import BlenderbotTokenizer, BlenderbotForConditionalGeneration
 from googletrans import Translator, LANGUAGES
 import logging
+import requests
 
 class ChatBot():
-    def __init__(self, model_name = "facebook/blenderbot-400M-distill"):
-        self.model = self.get_model(model_name)
-        self.tokenizer = self.get_tokenizer(model_name)
+    def __init__(self, model_name = "facebook/blenderbot-400M-distill", api = True):
+        if api:
+            self.api_url = "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill"
+            self.headers = {"Authorization": "Bearer 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"}
+            self.past_user_inputs = ["Hello"]
+            self.generated_responses = ["Hello, I am Nexa. How can I help you?"]
+        else:
+            self.model = self.get_model(model_name)
+            self.tokenizer = self.get_tokenizer(model_name)
         
+        self.translator = Translator()
+            
     @property
     def logger(self):
         if not hasattr(self, '_logger'):
@@ -31,8 +40,7 @@ class ChatBot():
     
     
     def translate(self, text, source_lang, target_lang):
-        translator = Translator()
-        translation = translator.translate(text, src=source_lang, dest=target_lang)
+        translation = self.translator.translate(text, src=source_lang, dest=target_lang)
         return translation.text
     
     
@@ -59,3 +67,35 @@ class ChatBot():
             response_text = self.predict(user_input)
 
             print(f"Chatbot: {response_text}")
+            
+    def query(self, payload):
+        response = requests.post(self.api_url, headers=self.headers, json=payload)
+        return response.json()
+            
+            
+            
+    def predict_api(self, text):
+        
+        
+        user_text_en = self.translator.translate(text, src='tr', dest='en').text
+
+        
+        output_en = self.query({
+            "inputs": {
+                "past_user_inputs": self.past_user_inputs,
+                "generated_responses": self.generated_responses,
+                "text": user_text_en
+            }
+        })
+        print(output_en)
+        if len(output_en['conversation']['past_user_inputs']) > 3:
+            self.past_user_inputs = output_en['conversation']['past_user_inputs'][:-3]
+            self.generated_responses = output_en['conversation']['generated_responses'][:-3]
+
+        output_tr = self.translator.translate(output_en["generated_text"], src='en', dest='tr').text
+
+        return output_tr
+            
+        
+        
+        
