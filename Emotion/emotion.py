@@ -22,6 +22,7 @@ class EmotionDetection():
     
     def single_predict(self, base64_img):
         
+        base64_img = base64_img.split(",")[1]
         img_data = base64.b64decode(base64_img)
         nparr = np.frombuffer(img_data, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)

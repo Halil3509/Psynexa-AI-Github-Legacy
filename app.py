@@ -7,7 +7,8 @@ import json
 from flask_cors import CORS 
 import General
 import time
-import threading
+# import threading
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +18,14 @@ CORS(app)
 data = {}
 
 run_class = General.Run()
+
+auth_token = """0b6c05e02ee081f0f9d3d733e6dadefcc7d3e5bb2c10f3195927e2794002eefdf5f6f2774afeba9188a133385082a36818baca38f93bf05
+be5a9c68672a84f3efde436ce64afeedf5e3d79f36980e9e8cd9ed4f41939dd2a666f386118604991d5ada44ca4ca9c02881e1692e8cd5ad4f6016cea4390fb0931ae7c3ae9ad573e"""
+
+headers = {
+    'Authorization': f'Bearer {auth_token}',
+    'Content-Type': 'application/json'  # Assuming you're sending JSON data
+}
 
 
 # definings
@@ -120,7 +129,8 @@ def get_audio_temp_legacy():
     
     range_to_disorder = {
             'bipolar': 'Bipolar',
-            'depression': 'Depresyon'
+            'depression': 'Depresyon',
+            'normal':'Normal'
         }
         
     ## Adding ratio part
@@ -130,19 +140,38 @@ def get_audio_temp_legacy():
     disorder_name = range_to_disorder[speed_range]
 
     # Add speech speed ratio to general
-    General.change_ratios(
-        values_dict=total_disorder_json,
-        value=run_class.ratios["Speech"][speed_range],
-        name=disorder_name,
-        type='inc'
-    )
+    if disorder_name != 'Normal':
+        total_disorder_results_new = General.change_ratios(
+            values_dict=total_disorder_json,
+            value=run_class.ratios["Speech"][speed_range],
+            name=disorder_name,
+            type='inc'
+        )
     
-    return jsonify({"message": "işlem başarılı",
-                    "total_disorder_json": total_disorder_json, 
-                    "speech_speed":{
-                        "ratio":run_class.speech_speed_class.speech_score,
-                        "label": speed_range}
-                    })
+    return_dict = {
+        'data':{
+            'generalResult':total_disorder_results_new,
+            'speechSpeedLabel': disorder_name
+        }
+    }
+    
+    
+    # Save DB
+    post_url = "http://api.psynexa.com/api/meeting-analyses"
+    response_post = requests.post(post_url, headers= headers, json=return_dict)
+    created_id = json.loads(response_post.text)['data']['id']
+    
+    
+    put_url = f"http://api.psynexa.com/api/clients/{created_id}"
+    put_data = {
+        "data":{  
+                "meetingAnalyzes": [created_id]
+            }
+    } 
+    response_put = requests.put(put_url, headers=headers, json=put_data)
+        
+    return jsonify({"message": "Legacy Punct text process finished successfully.",
+                    "data": response_put.text}), response_put.status_code
 
 
 
@@ -282,39 +311,36 @@ def threapy_analyze_and_add():
     head_plot_dict["value"].extend(run_class._head_class.plot_values["value"])
 
     
-    #emotion_dict["time"].extend(run_class._emotion_class.plot_dict["time"])
-    #emotion_dict["value"].extend(run_class._emotion_class.plot_dict["value"])
+    emotion_dict["time"].extend(run_class._emotion_class.plot_dict["time"])
+    emotion_dict["value"].extend(run_class._emotion_class.plot_dict["value"])
 
 
 
 def chane_ratio_analyzing_video():
+    global frame_buffer
     
     if len(frame_buffer) != 0:
         threapy_analyze_and_add()
     
-    global last_request_time
     
     # Specify Labels
     run_class._eye_class.specify_label(np.mean(eye_scores))
     run_class._head_class.specify_label(np.mean(head_scores))
     
-    total_disorder_results =  {
-        "Agorafobi": 0.1,
-        "Bipolar": 0.1,
-        "Borderline": 0.1,
-        "Cinsel İlişkili Bozukluklar": 0.0,
-        "DEHB": 90.9,
-        "Demans": 8.1,
-        "Depresyon": 0.0,
-        "Madde ile ilişkili bozukluklar": 0.1,
-        "OKB": 0.3,
-        "Paranoid": 0.0,
-        "Parkinson": 0.1,
-        "Sosyal Fobi": 0.1,
-        "Yeme Bozuklukları": 0.0 } # get with request
+    print("Total disorder results variable is receiving...")
+    # Get total results
+    get_url = "http://api.psynexa.com/api/meeting-analyses"
+    get_response = requests.get(get_url, headers= headers)
     
-    if len(frame_buffer) == 0:
-        last_request_time = time.time()
+    data_dict = json.loads(get_response.text)
+    
+    total_disorder_results_id = data_dict['data'][-1]['id']
+    total_disorder_results = data_dict['data'][-1]['generalResult']
+    print("Total disorder results received")
+    
+    
+    if len(eye_scores) == 0:
+        raise IndexError("There is no image saved.")
     else:
         # Eye
         if run_class._eye_class.label != 'normal':
@@ -333,42 +359,45 @@ def chane_ratio_analyzing_video():
             for t, v in zip(head_plot_dict["time"], head_plot_dict["value"])
         ]
         
-        print({'result': {
-        "Message":"Analyzing therapy process finished succesfully",
-        "Eye":{
-            "eye_label":run_class._eye_class.label,
-            "score":np.mean(eye_scores)
-        },
-        "Head":{
-            "label":run_class._head_class.label,
-            "score":np.mean(head_scores),
-            "plot_values":head_result_plot_json
-        },
-        # "Emotion":{
-        #     "plot_values": emotion_dict
-        # },
-        "General_results": total_disorder_results
-            }}), 200
+        emotion_result_plot_json = [
+            {"time": t, "value": v} 
+            for t, v in zip(emotion_dict["time"], emotion_dict["value"])
+        ]
+        
+        
+        put_url = f"http://api.psynexa.com/api/meeting-analyses/{total_disorder_results_id}"
+        
+        return_dict =  {'data': {
+        "headLabel":run_class._head_class.label,
+        "eyeLabel":run_class._eye_class.label,
+        "headPlot":head_result_plot_json,
+        "emotionPlot":emotion_result_plot_json,
+        "generalResult": total_disorder_results
+        }}
+        
+        response_put = requests.put(url = put_url, headers=headers, json=return_dict)
+        
+        print("Changed ratios for images: ", response_put.text)
 
 
-def track_last_request():
-    global last_request_time
-    while True:
-        print(time.time() - last_request_time)
-        if time.time() - last_request_time > 60:
-            # Do something after 1 minute of no requests
+
+# def track_last_request():
+#     global last_request_time
+#     while True:
+#         print(time.time() - last_request_time)
+#         if time.time() - last_request_time > 60:
+#             # Do something after 1 minute of no requests
             
-            chane_ratio_analyzing_video()
-            last_request_time = time.time()
-        time.sleep(1)
+#             chane_ratio_analyzing_video()
+#             last_request_time = time.time()
+#         time.sleep(1)
 
-# Start the thread to track requests
-tracker_thread = threading.Thread(target=track_last_request)
-tracker_thread.daemon = True
-tracker_thread.start()
+# # Start the thread to track requests
+# tracker_thread = threading.Thread(target=track_last_request)
+# tracker_thread.daemon = True
+# tracker_thread.start()
 
 
-            
 
 @app.route('/ai/video_analyze', methods=['POST'])
 def analyze_video():
@@ -376,24 +405,34 @@ def analyze_video():
         data = request.json  # Assuming the request contains a JSON body
         image = data.get("image")
         
-        global last_request_time
         global frame_buffer
         
-        last_request_time = time.time()
         frame_buffer.append(image)
         
         
         if len(frame_buffer) > 20:
             threapy_analyze_and_add()
 
-           
-        
     
-        return jsonify({"message": "Thanks"})
+        return jsonify({"message": "Thanks",
+                        "Batch size": len(frame_buffer)})
     
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/ai/change_video_analyze_ratios', methods=['GET'])
+def change_video_ratios():
+    try:
+        
+        chane_ratio_analyzing_video()
+        return jsonify({"message": "Total disorders has been updated for images."}), 200
+    
+    except Exception as err:
+        return jsonify({"error": str(err)}), 500
+    
+    
     
     
 @app.route('/ai/send_message_nexa', methods=['POST'])
