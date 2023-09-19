@@ -271,8 +271,26 @@ def receive_frame():
         return jsonify({'message': str(e)}), 500
 
 
+def threapy_analyze_and_add():
+    # Run whole analysis
+    run_class.analyze_therapy(frame_buffer)
+    frame_buffer = []
+    
+    eye_scores.append(run_class._eye_class.score)
+    head_scores.append(run_class._head_class.score["Variance"])
+    head_plot_dict["time"].extend(run_class._head_class.plot_values["time"])
+    head_plot_dict["value"].extend(run_class._head_class.plot_values["value"])
+
+    
+    #emotion_dict["time"].extend(run_class._emotion_class.plot_dict["time"])
+    #emotion_dict["value"].extend(run_class._emotion_class.plot_dict["value"])
+
+
 
 def chane_ratio_analyzing_video():
+    
+    if len(frame_buffer) != 0:
+        threapy_analyze_and_add()
     
     global last_request_time
     
@@ -350,6 +368,7 @@ tracker_thread.daemon = True
 tracker_thread.start()
 
 
+            
 
 @app.route('/ai/video_analyze', methods=['POST'])
 def analyze_video():
@@ -365,20 +384,8 @@ def analyze_video():
         
         
         if len(frame_buffer) > 20:
-            
-            # Run whole analysis
-            run_class.analyze_therapy(frame_buffer)
-            frame_buffer = []
-            
-            eye_scores.append(run_class._eye_class.score)
-            head_scores.append(run_class._head_class.score["Variance"])
-            head_plot_dict["time"].extend(run_class._head_class.plot_values["time"])
-            head_plot_dict["value"].extend(run_class._head_class.plot_values["value"])
+            threapy_analyze_and_add()
 
-            
-            #emotion_dict["time"].extend(run_class._emotion_class.plot_dict["time"])
-            #emotion_dict["value"].extend(run_class._emotion_class.plot_dict["value"])
-            
            
         
     

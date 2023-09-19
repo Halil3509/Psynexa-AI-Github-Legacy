@@ -172,7 +172,7 @@ class ADHD_Calculation():
             for base64_frame in tqdm(video_array):
                 
                 # Base64 to img
-                base64_frame = base64_image.split(",")[1]
+                base64_frame = base64_frame.split(",")[1]
                 img_data = base64.b64decode(base64_frame)
                 nparr = np.frombuffer(img_data, np.uint8)
                 frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)

@@ -12,7 +12,7 @@ import DemantiaClockTest
 import TopicSegmentation
 import DisorderDetection
 import ChatBot
-#import Emotion
+import Emotion
 
 
 class Run():
@@ -23,7 +23,7 @@ class Run():
         #self.whisper_model = self.get_whisper_model()       
         self._eye_class = EyeDetection.ADHD_Calculation()
         self._head_class = HeadOscillation.Head()
-        #self._emotion_class = Emotion.EmotionDetection()
+        self._emotion_class = Emotion.EmotionDetection()
         self.speech_speed_class = SpeechSpeed.SpeechSpeedClass()
         self._legacy_punct_model = SpeechSpeed.LegacyPunctuation()
         self._chatbot = ChatBot.ChatBot()
@@ -86,7 +86,7 @@ class Run():
         self._head_class.api_detection(video_array = video_array)
         
         # Emotion that will be added
-        #self._emotion_class.api_detection(video_array = video_array)
+        self._emotion_class.api_detection(video_array = video_array)
         
         
 
