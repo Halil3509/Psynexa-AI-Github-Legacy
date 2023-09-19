@@ -7,9 +7,9 @@ from torchvision.transforms import transforms
 from .models.resmasking import resmasking_dropout1
 import logging
 
-local_checkpoint_path = r'D:\Psynexa-AI-Github\Emotion\checkpoint\logos_z_masking'
-local_prototxt_path = r'D:\\Psynexa-AI-Github\\Emotion\\checkpoint\\deploy.prototxt.txt'
-local_ssd_checkpoint_path = r"D:\\Psynexa-AI-Github\\Emotion\\checkpoint\\res10_300x300_ssd_iter_140000.caffemodel"
+local_checkpoint_path = '/home/halil7hatun/Psynexa-AI-Github\Emotion/checkpoint/ogos_z_masking'
+local_prototxt_path = '/home/halil7hatun/Psynexa-AI-Github/Emotion/checkpoint/deploy.prototxt.txt'
+local_ssd_checkpoint_path = "/home/halil7hatun/Psynexa-AI-Github/Emotion/checkpoint/res10_300x300_ssd_iter_140000.caffemodel"
 
 
 def ensure_color(image):
