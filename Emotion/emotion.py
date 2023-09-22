@@ -54,7 +54,6 @@ class EmotionDetection():
                 
                 results = self.single_predict(base64_img=base64_img)
                 
-                print("emotion results: ", results)
                 plot_dict["time"].append(counter)
                 plot_dict["value"].append(results[0]["emo_label"])
                 counter +=1

@@ -19,12 +19,15 @@ data = {}
 
 run_class = General.Run()
 
-auth_token = """0b6c05e02ee081f0f9d3d733e6dadefcc7d3e5bb2c10f3195927e2794002eefdf5f6f2774afeba9188a133385082a36818baca38f93bf05
-be5a9c68672a84f3efde436ce64afeedf5e3d79f36980e9e8cd9ed4f41939dd2a666f386118604991d5ada44ca4ca9c02881e1692e8cd5ad4f6016cea4390fb0931ae7c3ae9ad573e"""
+auth_token = """0b6c05e02ee081f0f9d3d733e6dadefcc7d3e5bb2c10f3195927e2794002eefdf5f6f2774afeba9188a133385082a36818baca38f93bf05be5a9c68672a84f3efde436ce64afeedf5e3d79f36980e9e8cd9ed4f41939dd2a666f386118604991d5ada44ca4ca9c02881e1692e8cd5ad4f6016cea4390fb0931ae7c3ae9ad573e"""
 
 headers = {
     'Authorization': f'Bearer {auth_token}',
     'Content-Type': 'application/json'  # Assuming you're sending JSON data
+}
+
+image_headers = {
+    'Authorization': f'Bearer {auth_token}'
 }
 
 
@@ -162,7 +165,7 @@ def get_audio_temp_legacy():
     created_id = json.loads(response_post.text)['data']['id']
     
     
-    put_url = f"http://api.psynexa.com/api/clients/{created_id}"
+    put_url = f"http://api.psynexa.com/api/clients/4"
     put_data = {
         "data":{  
                 "meetingAnalyzes": [created_id]
@@ -202,6 +205,32 @@ def detect_spiral_parkinson():
 
     print("Spiral Parkinson Adding ratio process finished")
     print("New Disorder results: ", updated_disorder_results)
+    
+    # Add to DB
+    global image_headers
+    global headers
+    
+    files = {'files': ('parkinson_image.png', img_data)}
+    image_url = 'http://api.psynexa.com/api/upload'
+    response_image = requests.post(image_url, headers= image_headers, files=files)
+
+    data_dict =  json.loads(response_image.text)
+    created_id = data_dict[0]["id"]
+
+    created_data = {
+        "data": {
+            "drawing": created_id,
+            "analysis": [{
+                "type":"parkinson",
+                "label": run_class._spiral_parkinson_class.estimated_label
+            }],
+            "client": 4
+        }
+    }
+    
+    client_result_url =" http://api.psynexa.com/api/client-results"
+    response_post = requests.post(client_result_url, headers= headers, json = created_data)
+    print("Parkin image was saved in DB")
 
     return jsonify({'message': 'Parkinson Spiral process finished successfully',
                     "label": run_class._spiral_parkinson_class.estimated_label,
@@ -275,32 +304,10 @@ def detect_dementia():
     
 
 
-@app.route('/ai/image_temp', methods=['POST'])
-def receive_frame():
-    try:
-        print(request.json)
-        json_file = request.json['images']
-        
-        
-            
-        data = json_file.read()
-        json_data = json.loads(data)
-
-        # Access the images array
-        images = json_data['images']
-
-        # Process the images as needed
-        for i, base64_data in enumerate(images):
-            with open(f'uploaded_image_{i}.png', 'wb') as f:
-                f.write(base64_data.decode('base64'))
-
-        return jsonify({'message': 'JSON file uploaded successfully!'}), 200
-
-    except Exception as e:
-        return jsonify({'message': str(e)}), 500
-
-
 def threapy_analyze_and_add():
+    
+    global frame_buffer
+    
     # Run whole analysis
     run_class.analyze_therapy(frame_buffer)
     frame_buffer = []
@@ -378,24 +385,6 @@ def chane_ratio_analyzing_video():
         response_put = requests.put(url = put_url, headers=headers, json=return_dict)
         
         print("Changed ratios for images: ", response_put.text)
-
-
-
-# def track_last_request():
-#     global last_request_time
-#     while True:
-#         print(time.time() - last_request_time)
-#         if time.time() - last_request_time > 60:
-#             # Do something after 1 minute of no requests
-            
-#             chane_ratio_analyzing_video()
-#             last_request_time = time.time()
-#         time.sleep(1)
-
-# # Start the thread to track requests
-# tracker_thread = threading.Thread(target=track_last_request)
-# tracker_thread.daemon = True
-# tracker_thread.start()
 
 
 
