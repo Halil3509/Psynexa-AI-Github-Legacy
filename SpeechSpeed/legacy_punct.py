@@ -5,7 +5,7 @@ import requests
 class LegacyPunctuation():
     def __init__(self):
         self.restored_text = None
-        self.api_key = "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"
+        self.api_key = "<api_key>"
         self.api_url = "https://api-inference.huggingface.co/models/uygarkurt/bert-restore-punctuation-turkish"
         self.headers = {"Authorization": f"Bearer {self.api_key}"}
         
