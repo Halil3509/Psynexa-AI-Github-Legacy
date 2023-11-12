@@ -7,7 +7,7 @@ class ChatBot():
     def __init__(self, model_name = "facebook/blenderbot-400M-distill", api = True):
         if api:
             self.api_url = "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill"
-            self.headers = {"Authorization": "Bearer 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"}
+            self.headers = {"Authorization": "Bearer <apikey>"}
             self.past_user_inputs = ["Hello"]
             self.generated_responses = ["Hello, I am Nexa. How can I help you?"]
         else:
