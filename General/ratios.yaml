@@ -15,7 +15,7 @@ Head: {
 Speech: {
   depression: 10, # percent of increased depression value
   normal: 0, # percent of decreased depression and bipolar value
-  bipolar: 10
+  bipolar: 20
 }
 
 Dementia: {

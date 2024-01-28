@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def change_ratios(values_dict, value, name, type = "inc"):
     """Add ratio
 
@@ -18,12 +19,9 @@ def change_ratios(values_dict, value, name, type = "inc"):
     print(f"Changing ratios process is starting for {name}...")
     
     old_value = values_dict[name]
-    
-    
     if type == "inc":
-        new_value = (old_value + value)
-        
-        
+        new_value = old_value + value
+
     elif type == "dec":  
         new_value = old_value - value
         
@@ -38,12 +36,12 @@ def change_ratios(values_dict, value, name, type = "inc"):
     coff_old = 100 / (100 + old_value)
     
     average_value = np.round((old_value * coff_old + new_value * coff_new) / (coff_old + coff_new), 2) 
-    
+
     values_dict[name] = average_value
-    
+
     total = sum(values_dict.values())
     # Step 2 and 3: Divide by total and multiply by 100
     percentages = {key: np.round((value / total) * 100, 2) for key, value in values_dict.items()}
-    
+
     print(f"Changing ratios process finished for {name}.")
     return percentages

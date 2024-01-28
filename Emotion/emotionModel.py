@@ -7,9 +7,9 @@ from torchvision.transforms import transforms
 from .models.resmasking import resmasking_dropout1
 import logging
 
-local_checkpoint_path = r'D:\Psynexa-AI-Github\Emotion\checkpoint\logos_z_masking'
-local_prototxt_path = r'D:\\Psynexa-AI-Github\\Emotion\\checkpoint\\deploy.prototxt.txt'
-local_ssd_checkpoint_path = r"D:\\Psynexa-AI-Github\\Emotion\\checkpoint\\res10_300x300_ssd_iter_140000.caffemodel"
+local_checkpoint_path = r'C:\Users\halilibrahim.hatun\Documents\Psynexa\Capstone-project\Emotion\checkpoint\res10_300x300_ssd_iter_140000.caffemodel'
+local_prototxt_path = r'C:\Users\halilibrahim.hatun\Documents\Psynexa\Capstone-project\Emotion\checkpoint\deploy.prototxt.txt'
+local_ssd_checkpoint_path = r"C:\Users\halilibrahim.hatun\Documents\Psynexa\Capstone-project\Emotion\checkpoint\Z_resmasking_dropout1_rot30_2019Nov30_13.32"
 
 
 def ensure_color(image):
@@ -59,7 +59,6 @@ with open(config_path) as ref:
 image_size = (configs["image_size"], configs["image_size"])
 
 is_cuda = torch.cuda.is_available()
-
 
 
 def get_emo_model():
