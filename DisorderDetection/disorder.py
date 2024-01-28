@@ -74,7 +74,7 @@ class DisorderDetection:
         self.logger.info("Tokenizer has been uploaded.")
         return tokenizer
 
-    def _get_model(self, model_path=r"C:\Users\halilibrahim.hatun\Documents\Psynexa\Capstone-project\DisorderDetection\models\bert_alpha_v4.pt"):
+    def _get_model(self, model_path=r"/home/psynexa/AI/Psynexa-AI-Github/DisorderDetection/models/bert_alpha_v4.pt"):
         self.logger.info("Disorder Detection model is uploading...")
         try:
             model = torch.load(model_path, map_location=self.device)

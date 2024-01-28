@@ -18,7 +18,7 @@ class ADHDCalculation:
         self.score = None
         self.label = None  # Result Label
         self._coords = self.get_yaml_file()
-        self._range = self.get_yaml_file(r"C:\Users\halilibrahim.hatun\Documents\Psynexa\Capstone-project\EyeDetection\eye_range.yaml")
+        self._range = self.get_yaml_file(r"/home/psynexa/AI/Psynexa-AI-Github/EyeDetection/eye_range.yaml")
 
     @property
     def logger(self):
@@ -29,7 +29,7 @@ class ADHDCalculation:
         return self._logger
 
     def get_yaml_file(self,
-                      file_path=r'C:\Users\halilibrahim.hatun\Documents\Psynexa\Capstone-project\EyeDetection\landmarks.yaml'):
+                      file_path=r'/home/psynexa/AI/Psynexa-AI-Github/EyeDetection/landmarks.yaml'):
         try:
             with open(file_path, 'r') as yaml_file:
                 yaml_data = yaml.safe_load(yaml_file)

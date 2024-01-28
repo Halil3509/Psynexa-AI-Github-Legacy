@@ -48,6 +48,10 @@ def upload_audio(file):
     # Return the path to the uploaded file
     return base_url + filename
 
+@app.route('/ai/analyse', methods=['POST'])
+def analyse():
+    pass
+
 
 @app.route('/ai/audio_temp', methods=['POST'])
 def get_audio_temp():

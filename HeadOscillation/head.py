@@ -21,7 +21,7 @@ class Head:
         self.plot_values = None
         self._full_landmarks = self.get_yaml(name="Landmark")
         self._range = self.get_yaml(
-            path=r"C:\Users\halilibrahim.hatun\Documents\Psynexa\Capstone-project\HeadOscillation\head_range.yaml",
+            path=r"/home/psynexa/AI/Psynexa-AI-Github/HeadOscillation/head_range.yaml",
             name="Range YAML")
 
     @property
@@ -39,7 +39,7 @@ class Head:
             raise FileNotFoundError(f"{video_path} was not found.")
 
     def get_yaml(self,
-                 path=r"C:\Users\halilibrahim.hatun\Documents\Psynexa\Capstone-project\HeadOscillation\indexes.yaml",
+                 path=r"/home/psynexa/AI/Psynexa-AI-Github/HeadOscillation/indexes.yaml",
                  name=None):
         with open(path, 'r') as yaml_file:
             data = yaml.load(yaml_file, Loader=yaml.FullLoader)
@@ -161,7 +161,7 @@ class Head:
         self.logger.info("Detecting process finished successfully. Let's save results")
 
         self.save_results(plot_dict=plot_dict, name=name, plot=plot)
-
+        print("Head score: ", self.score)
         return self.score
 
     def save_results(self, plot_dict, name=None, plot=False):
