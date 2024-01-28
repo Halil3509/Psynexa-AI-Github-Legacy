@@ -21,7 +21,7 @@ class Head:
         self.plot_values = None
         self._full_landmarks = self.get_yaml(name="Landmark")
         self._range = self.get_yaml(
-            path=r"/home/psynexa/AI/Psynexa-AI-Github/HeadOscillation/head_range.yaml",
+            path=r"/home/psynexa/Psynexa/AI/Psynexa-AI-Github/HeadOscillation/head_range.yaml",
             name="Range YAML")
 
     @property
@@ -39,7 +39,7 @@ class Head:
             raise FileNotFoundError(f"{video_path} was not found.")
 
     def get_yaml(self,
-                 path=r"/home/psynexa/AI/Psynexa-AI-Github/HeadOscillation/indexes.yaml",
+                 path=r"/home/psynexa/Psynexa/AI/Psynexa-AI-Github/HeadOscillation/indexes.yaml",
                  name=None):
         with open(path, 'r') as yaml_file:
             data = yaml.load(yaml_file, Loader=yaml.FullLoader)

@@ -30,12 +30,13 @@ speech_speed_class = SpeechSpeedClass()
 head_class = Head()
 eye_class = ADHDCalculation()
 whisper_model = whisper.load_model("medium")
+emotion_model = EmotionDetection()
 
 
 import yaml
 
 
-def get_ratios(path=r"/home/psynexa/AI/Psynexa-AI-Github/General/ratios.yaml"):
+def get_ratios(path=r"/home/psynexa/Psynexa/AI/Psynexa-AI-Github/General/ratios.yaml"):
     with open(path, 'r') as yaml_file:
         data = yaml.load(yaml_file, Loader=yaml.FullLoader)
         return data
@@ -53,7 +54,7 @@ def speech_to_text(audio_path):
 
 def analyse_video(video_path):
 
-    output_audio_path= "/home/psynexa/AI/Psynexa-AI-Github/wav_files/temp_audio.wav"
+    output_audio_path= "/home/psynexa/Psynexa/AI/Psynexa-AI-Github/Results/wav_files/temp_audio.wav"
     # Mp4 to wav
     # command = f"ffmpeg -i {video_path} {output_audio_path}"
     print("Vİdeo is being converted...")
@@ -92,7 +93,7 @@ def analyse_video(video_path):
     print("After Speech: ", new_total_dict)
 
     # Head Oscillation
-    head_class.detect_video(video_path=r"/home/psynexa/AI/Psynexa-AI-Github/temp_video.mp4")
+    head_class.detect_video(video_path=r"/home/psynexa/Psynexa/AI/Psynexa-AI-Github/temp_video.mp4")
     if head_class.label != 'normal' and head_class.label != 'anomaly':
         new_total_dict = calculation.change_ratios(values_dict=new_total_dict,
                                                    value=ratios["Head"][head_class.label],
@@ -100,13 +101,18 @@ def analyse_video(video_path):
     print("After Head: ", new_total_dict)
 
     # Eye ADHD Detection
-    eye_class.calc_eye_score(video_path=r"/home/psynexa/AI/Psynexa-AI-Github/temp_video.mp4")
+    eye_class.calc_eye_score(video_path=r"/home/psynexa/Psynexa/AI/Psynexa-AI-Github/temp_video.mp4")
     if eye_class.label != 'normal':
         new_total_dict = calculation.change_ratios(values_dict=new_total_dict,
                                                        value=ratios["Eye"][eye_class.label],
                                                        name="DEHB", type="inc")
 
     print("After Eye: ", new_total_dict)
+
+
+    # Emotion Detection
+    emotion_plot_values = emotion_model.detect_video(video_path=video_path)
+
 
 
 
@@ -121,6 +127,106 @@ def convert(mp4_file_path, wav_file_path):
     clip.audio.write_audiofile(wav_file_path)
 
 
+import plotly.express as px
+import matplotlib.pyplot as plt
+import random
+import plotly.graph_objects as go
+
+def save_plots(disorder_dict: dict, emotions: pd.DataFrame, head_oscillations: dict):
+
+    # *** General disorder plot ***
+
+    fig = plt.figure(figsize = (15,30))
+    # Verileri sırala
+    siralama = sorted(disorder_dict.items(), key=lambda x: x[1], reverse=False)
+    isimler, degerler = zip(*siralama)
+
+    # Bar plot oluştur
+    fig = px.bar(x=degerler, y=isimler, labels={'x':'Oranlar', 'y':'Hastalıklar'}, title='PSikolojik Hastalık Durumu Grafiği')
+    # Figür boyutunu artır
+    fig.update_layout(width=800, height=600)
+
+    save_file_path_disorder ='/home/psynexa/Psynexa/AI/Psynexa-AI-Github/Results/plots/general_disorder_plot.png'
+
+    # save as an image
+    fig.write_image(save_file_path_disorder)
+    print("General disorder plot was saved. ")
+
+
+    # *** Head Oscillation plot ***
+    # Rastgele veri oluştur
+    random.seed(0)  # Sabit bir seed kullanarak her çalıştırmada aynı veri üretilmesini sağla
+    veri = [random.uniform(0, 0.50) for _ in range(1000)]
+
+    # Eğer önceki bir figür varsa temizle
+    go.Figure()
+
+    # Line plot oluştur
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(y=veri, mode='lines', name='Rastgele Veri'))
+
+    # Horizontal çizgi ekle
+    fig.add_shape(
+        dict(
+            type="line",
+            x0=0,
+            x1=len(veri),
+            y0=0.60,
+            y1=0.60,
+            line=dict(color="red", width=2)
+        )
+    )
+
+    fig.update_yaxes(range=[0, 2])
+
+    fig.update_layout(
+        yaxis_title="Kafa Hareket Değişimi",
+        xaxis_title="Zaman"
+    )
+
+    save_file_path_head ='/home/psynexa/Psynexa/AI/Psynexa-AI-Github/Results/plots/head_oscillation_plot.png'
+
+    # save as an image
+    fig.write_image(save_file_path_head)
+
+
+    # *** Emotions ***
+
+
+    # Her bir duygu için belirlenmiş renkler
+    duygu_renkleri = {
+        "Üzgün": "blue",
+        "Kızgın": "red",
+        "Mutlu": "yellow",
+        "Korkmuş": "purple",
+        "Tiksinmiş": "green",
+        "Şaşırmış": "orange",
+        "Normal": "gray"
+    }
+
+
+    # Scatter plot oluşturma
+    scatter_fig = px.scatter(df, x='time', y='emotion', color='emotion',
+                            color_discrete_map=duygu_renkleri,
+                            title='Zamana Bağlı Duygu Değişimi')
+
+    # Çizgi grafiği oluşturma
+    line_fig = px.line(df, x='Zaman', y='Duygu', title='Zamana Bağlı Duygu Değişimi')
+
+    # Her iki grafiği tek bir alt başlık altında birleştirme
+    scatter_fig.update_traces(mode='markers', marker=dict(size=10))  # Nokta boyutunu ayarla
+    line_fig.update_traces(line=dict(dash='dot'))  # Çizgiyi kesik yap
+
+    for trace in line_fig.data:
+        scatter_fig.add_trace(trace)
+
+    # Grafiği göster
+    scatter_fig.show()
+
+    return save_file_path_disorder, save_file_path_head, 
+
+
+
 
 if __name__ == '__main__':
-    analyse_video(video_path='/home/psynexa/AI/Psynexa-AI-Github/temp_video.mp4')
+    analyse_video(video_path='/home/psynexa/Psynexa/AI/Psynexa-AI-Github/temp_video.mp4')

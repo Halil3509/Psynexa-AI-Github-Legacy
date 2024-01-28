@@ -10,6 +10,12 @@ from flask_cors import CORS
 
 import General
 
+import capstone_project
+from TopicSegmentation.gemini_topic import GeminiTopic
+
+gemini_chat_bot_model = GeminiTopic()
+print("Gemini model is ready in API :)")
+
 app = Flask(__name__)
 cors = CORS(app)
 
@@ -50,7 +56,21 @@ def upload_audio(file):
 
 @app.route('/ai/analyse', methods=['POST'])
 def analyse():
-    pass
+    data = request.json
+    video_path = data.get('video_path')
+    capstone_project.analyse_video(video_path=video_path)
+
+
+@app.route('/ai/send_chatbot', methods=['POST'])
+def talk_gemini():
+    data = request.json
+    text = data.get("text")
+
+    gemini_chat_bot_model()
+    response = gemini_chat_bot_model.model.generate_content(text)
+
+    return jsonify({"chatbot": response.text}) 
+    
 
 
 @app.route('/ai/audio_temp', methods=['POST'])

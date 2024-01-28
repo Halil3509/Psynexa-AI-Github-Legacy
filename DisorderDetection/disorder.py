@@ -74,9 +74,10 @@ class DisorderDetection:
         self.logger.info("Tokenizer has been uploaded.")
         return tokenizer
 
-    def _get_model(self, model_path=r"/home/psynexa/AI/Psynexa-AI-Github/DisorderDetection/models/bert_alpha_v4.pt"):
+    def _get_model(self, model_path=r"/home/psynexa/Psynexa/AI/Psynexa-AI-Github/DisorderDetection/models/bert_alpha_v4.pt"):
         self.logger.info("Disorder Detection model is uploading...")
         try:
+            print("deviCE: ", self.device)
             model = torch.load(model_path, map_location=self.device)
             model.eval()
             self.logger.info("DL model is ready :)")
@@ -86,7 +87,7 @@ class DisorderDetection:
         except TypeError:
             raise TypeError("DL model must be entire saved model.")
 
-    def _get_label_classes(self, path=r"C:\Users\halilibrahim.hatun\Documents\Psynexa\Capstone-project\DisorderDetection\label_classes.yaml"):
+    def _get_label_classes(self, path=r"/home/psynexa/Psynexa/AI/Psynexa-AI-Github/DisorderDetection/label_classes.yaml"):
         with open(path, 'r') as file:
             # Load the YAML data into a Python variable
             data = yaml.load(file, Loader=yaml.FullLoader)
