@@ -4,7 +4,7 @@ import logging
 
 class GeminiTopic:
     def __init__(self):
-        genai.configure(api_key='AIzaSyBle9ehQtR5jU4NJsq9i6ilmsLdLOoocFo')
+        genai.configure(api_key='<apikey>')
         self.logger = self.get_logger()
         self.model = genai.GenerativeModel('gemini-pro')
 
